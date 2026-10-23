@@ -1,0 +1,12 @@
+{
+  "name": "rev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A fast approve/deny gate for GitHub Actions",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/corpus.js && node --check src/gate.js && node --check src/index.js"
+  }
+}

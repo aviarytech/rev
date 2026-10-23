@@ -1,0 +1,42 @@
+name: Try REV
+on:
+  workflow_dispatch:
+    inputs:
+      policy:
+        description: Policy to evaluate against this run's tests and outputs
+        required: true
+        default: Approve only if the test step succeeded and its output says passed.
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        uses: actions/checkout@v4
+      - id: node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee evidence.txt
+          echo "result=passed" >> "$GITHUB_OUTPUT"
+      - name: Evaluate the gate
+        id: rev
+        if: ${{ !cancelled() }}
+        uses: ./
+        with:
+          api-key: ${{ secrets.TYPESAFE_API_KEY }}
+          policy: ${{ inputs.policy }}
+          steps: ${{ toJSON(steps) }}
+          needs: ${{ toJSON(needs) }}
+          inputs: ${{ toJSON(inputs) }}
+          prior-inputs: >-
+            {"checkout":{},"node":{"node-version":"24"},"test":{"command":"npm test"}}
+          corpus-file: evidence.txt
+      - name: Continue after approval
+        if: ${{ success() && steps.rev.outputs.approved == 'true' }}
+        run: echo "REV approved. A protected operation can go here."

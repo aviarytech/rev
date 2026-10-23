@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run check
+      - run: npm test
+      - name: Verify native action failure and outputs
+        id: gate
+        continue-on-error: true
+        uses: ./
+        with:
+          policy: All checks must pass.
+          steps: '{"test":{"outcome":"failure","conclusion":"success"}}'
+      - name: Assert the gate failed closed
+        env:
+          OUTCOME: ${{ steps.gate.outcome }}
+          DECISION: ${{ steps.gate.outputs.decision }}
+          APPROVED: ${{ steps.gate.outputs.approved }}
+        run: node -e "const assert = require('node:assert/strict'); assert.equal(process.env.OUTCOME, 'failure'); assert.equal(process.env.DECISION, 'deny'); assert.equal(process.env.APPROVED, 'false');"
