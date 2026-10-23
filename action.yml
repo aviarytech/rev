@@ -1,5 +1,5 @@
 name: REV
-description: A fast approve/deny CI gate powered by TypeSafe AI's Jev.
+description: Evaluate task acceptance criteria against commit-bound implementation evidence.
 author: REV
 branding:
   icon: check-circle
@@ -8,51 +8,55 @@ inputs:
   api-key:
     description: TypeSafe API key. Alternatively set TYPESAFE_API_KEY.
     required: false
-  policy:
-    description: Optional replacement for REV's default review of completed operations.
-    required: false
+  task-file:
+    description: JSON task and acceptance criteria manifest (version 1).
+    required: true
+  evidence-file:
+    description: JSON evidence manifest with headSha and named source items (version 1).
+    required: true
+  head-sha:
+    description: Exact PR head commit expected in the evidence manifest. Not the synthetic merge SHA.
+    required: true
   steps:
-    description: Earlier named steps in this job, supplied as toJSON(steps).
+    description: Earlier named step results as toJSON(steps).
     default: '{}'
   needs:
-    description: Dependency jobs, supplied as toJSON(needs).
+    description: All applicable dependency job results as toJSON(needs).
     default: '{}'
-  inputs:
-    description: Workflow inputs, supplied as toJSON(inputs).
-    default: '{}'
-  prior-inputs:
-    description: JSON object mapping earlier step IDs to their non-secret inputs.
-    default: '{}'
-  corpus-file:
-    description: Optional UTF-8 text or JSON evidence file, such as captured tool output.
-    required: false
+  report-file:
+    description: Where to write the machine-readable verdict report. Contains criterion text and source names, not evidence content.
+    default: rev-report.json
   model:
-    description: TypeSafe model ID or alias.
+    description: TypeSafe model ID. Changes require reevaluation.
     default: jev-1.14.0
   min-probability:
-    description: Minimum approve probability, from 0.5 to 1.
+    description: Minimum probability for both the verdict and primary citation.
     default: '0.9'
   min-confidence:
-    description: Minimum Choice confidence, from 0 to 1.
+    description: Minimum Choice confidence for both the verdict and primary citation.
     default: '0.8'
   timeout-ms:
-    description: API deadline in milliseconds, from 100 to 60000. No retries.
+    description: API deadline in milliseconds (100–60000). One request, no retries.
     default: '10000'
 outputs:
   decision:
-    description: approve or deny. Errors also produce deny.
+    description: approve or deny. Errors deny.
   approved:
-    description: 'true only when the gate approves; otherwise false.'
-  probability:
-    description: Jev's approve probability, or empty if not evaluated.
-  confidence:
-    description: Choice confidence, or empty if not evaluated.
-  model:
-    description: Actual model returned by TypeSafe, or empty if not evaluated.
+    description: String true only when all criteria are verified and supplied CI results pass.
   reason:
-    description: Stable code explaining approval or denial.
+    description: Stable decision or error code.
+  head-sha:
+    description: Commit evaluated. Empty if input validation failed.
+  verified:
+    description: Number of criteria judged satisfied with sufficient confidence and a citation.
+  total:
+    description: Number of acceptance criteria in the validated task.
+  report-file:
+    description: Path to the JSON report.
+  model:
+    description: Actual model returned, or empty if no evaluation completed.
   duration-ms:
-    description: Total gate execution time in milliseconds.
+    description: Total execution time.
 runs:
   using: node24
   main: src/index.js

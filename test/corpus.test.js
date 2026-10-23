@@ -1,32 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildCorpus, MAX_CORPUS_BYTES } from '../src/corpus.js';
-
-test('retains the supplied evidence and identifies the workflow run', () => {
-  const corpus = buildCorpus({
-    steps: '{"build":{"outcome":"success","outputs":{"digest":"abc"}}}',
-    needs: '{"test":{"result":"success"}}',
-    inputs: '{"environment":"production"}',
-    'prior-inputs': '{"build":{"target":"release"}}',
-  }, { GITHUB_RUN_ID: '123', GITHUB_SHA: 'sha' });
-  assert.equal(corpus.steps.build.outputs.digest, 'abc');
-  assert.equal(corpus.needs.test.result, 'success');
-  assert.equal(corpus.inputs.environment, 'production');
-  assert.equal(corpus.priorInputs.build.target, 'release');
-  assert.equal(corpus.run.id, '123');
-  assert.equal(corpus.run.sha, 'sha');
-});
-
-test('defaults missing contexts to empty objects', () => {
-  assert.deepEqual(buildCorpus({}, {}).steps, {});
-});
-
-test('rejects invalid evidence without echoing its contents', () => {
-  for (const steps of ['null', '[]', '"secret"', '{secret']) {
-    assert.throws(() => buildCorpus({ steps }, {}), /steps must be/);
+import { buildCorpus } from '../src/corpus.js';
+import { task, HEAD } from '../eval/fixtures.js';
+const evidence = () => ({ version: 1, headSha: HEAD, items: [{ id: 'code', kind: 'code', source: 'file.js', content: 'export default 1' }] });
+test('requires actual acceptance criteria, unique IDs and known schema versions', () => {
+  for (const change of [{ version: 9 }, { criteria: [] }, { criteria: [task.criteria[0], task.criteria[0]] },
+    { criteria: [{ id: 'none', description: 'reserved' }] }, { task: '' },
+    { criteria: Array.from({ length: 21 }, (_, i) => ({ id: `c${i}`, description: 'test' })) }]) {
+    assert.throws(() => buildCorpus({ ...task, ...change }, evidence(), { 'head-sha': HEAD }), /invalid-task/);
   }
 });
-
-test('bounds corpus size before parsing', () => {
-  assert.throws(() => buildCorpus({ steps: ' '.repeat(MAX_CORPUS_BYTES + 1) }), /1 MiB/);
+test('rejects stale evidence and never assumes GitHub merge SHA is PR head', () => {
+  assert.throws(() => buildCorpus(task, evidence(), {}), /invalid-head-sha/);
+  assert.throws(() => buildCorpus(task, evidence(), { 'head-sha': 'b'.repeat(40) }), /stale-evidence/);
+  const c = buildCorpus(task, evidence(), { 'head-sha': HEAD }, { GITHUB_SHA: 'merge' });
+  assert.equal(c.headSha, HEAD);
+});
+test('validates source IDs, content and contexts without exposing evidence', () => {
+  for (const items of [[{ id: 'x', kind: 'made-up', source: 'file', content: 'SECRET' }], [evidence().items[0], evidence().items[0]]]) {
+    assert.throws(() => buildCorpus(task, { ...evidence(), items }, { 'head-sha': HEAD }), /invalid-evidence/);
+  }
+  for (const steps of ['[]', 'null', '{SECRET']) assert.throws(() => buildCorpus(task, evidence(), { 'head-sha': HEAD, steps }), /invalid-context/);
+});
+test('aggregate evidence is bounded and never silently truncated', () => {
+  const e = evidence(); e.items[0].content = 'x'.repeat(1024 * 1024);
+  assert.throws(() => buildCorpus(task, e, { 'head-sha': HEAD }), /evidence-too-large/);
 });

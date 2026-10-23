@@ -1,40 +1,37 @@
-export const MAX_CORPUS_BYTES = 1024 * 1024;
-
-function objectInput(name, value) {
-  if (!value?.trim()) return {};
-  let parsed;
+import { GateError } from './errors.js';
+import { MAX_BYTES } from './io.js';
+const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
+const text = (x, limit) => typeof x === 'string' && x.trim().length > 0 && x.length <= limit;
+const id = x => typeof x === 'string' && /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(x) && x !== 'none';
+const sha = x => typeof x === 'string' && /^[a-f0-9]{40}$/.test(x);
+function context(value) {
   try {
-    parsed = JSON.parse(value);
-  } catch {
-    throw new Error(`${name} must be valid JSON`);
-  }
-  if (parsed === null || Array.isArray(parsed) || typeof parsed !== 'object') {
-    throw new Error(`${name} must be a JSON object`);
-  }
-  return parsed;
+    const parsed = JSON.parse(value || '{}');
+    if (!object(parsed)) throw new Error();
+    return parsed;
+  } catch { throw new GateError('invalid-context'); }
 }
 
-// No API calls or log scraping: callers explicitly supply GitHub expression
-// contexts and action inputs that GitHub does not make available to later steps.
-export function buildCorpus(raw = {}, env = process.env) {
-  const names = ['steps', 'needs', 'inputs', 'prior-inputs'];
-  const bytes = names.reduce((sum, name) => sum + Buffer.byteLength(raw[name] ?? ''), 0);
-  if (bytes > MAX_CORPUS_BYTES) throw new Error('Corpus exceeds the 1 MiB limit');
-  return {
-    version: 1,
-    run: {
-      repository: env.GITHUB_REPOSITORY ?? '',
-      workflow: env.GITHUB_WORKFLOW ?? '',
-      id: env.GITHUB_RUN_ID ?? '',
-      attempt: env.GITHUB_RUN_ATTEMPT ?? '',
-      job: env.GITHUB_JOB ?? '',
-      event: env.GITHUB_EVENT_NAME ?? '',
-      ref: env.GITHUB_REF ?? '',
-      sha: env.GITHUB_SHA ?? '',
-    },
-    steps: objectInput('steps', raw.steps),
-    needs: objectInput('needs', raw.needs),
-    inputs: objectInput('inputs', raw.inputs),
-    priorInputs: objectInput('prior-inputs', raw['prior-inputs']),
+export function buildCorpus(task, evidence, raw = {}, env = {}) {
+  if (!object(task) || task.version !== 1 || !text(task.task, 16000)
+    || !Array.isArray(task.criteria) || !task.criteria.length || task.criteria.length > 20
+    || task.criteria.some(c => !object(c) || !id(c.id) || !text(c.description, 4000))
+    || new Set(task.criteria.map(c => c.id)).size !== task.criteria.length) throw new GateError('invalid-task');
+  if (!object(evidence) || evidence.version !== 1 || !sha(evidence.headSha)
+    || !Array.isArray(evidence.items) || evidence.items.length > 40
+    || evidence.items.some(e => !object(e) || !id(e.id) || !text(e.source, 500)
+      || !['diff', 'code', 'test', 'behavior', 'report'].includes(e.kind) || !text(e.content, MAX_BYTES))
+    || new Set(evidence.items.map(e => e.id)).size !== evidence.items.length) throw new GateError('invalid-evidence');
+  if (!sha(raw['head-sha'])) throw new GateError('invalid-head-sha');
+  if (raw['head-sha'] !== evidence.headSha) throw new GateError('stale-evidence');
+  const corpus = {
+    version: 2,
+    headSha: raw['head-sha'],
+    task: { task: task.task, criteria: task.criteria.map(c => ({ id: c.id, description: c.description })) },
+    evidence: evidence.items.map(e => ({ id: e.id, kind: e.kind, source: e.source, content: e.content })),
+    steps: context(raw.steps), needs: context(raw.needs),
+    run: { repository: env.GITHUB_REPOSITORY || '', id: env.GITHUB_RUN_ID || '', attempt: env.GITHUB_RUN_ATTEMPT || '' },
   };
+  if (Buffer.byteLength(JSON.stringify(corpus)) > MAX_BYTES) throw new GateError('evidence-too-large');
+  return corpus;
 }

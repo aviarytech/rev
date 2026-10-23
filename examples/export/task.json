@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "task": "Protect the export endpoint: only authenticated users can export.",
+  "criteria": [
+    { "id": "anonymous", "description": "An anonymous GET /export returns HTTP 401 and no export data." },
+    { "id": "authenticated", "description": "An authenticated GET /export returns HTTP 200 with export data." }
+  ]
+}

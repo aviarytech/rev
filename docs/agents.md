@@ -1,41 +1,41 @@
-# REV merge contract
+# Agent contract
 
-Use REV as a final decision within an existing PR workflow. An agent needs authorization to merge; a REV approval does not grant that authorization.
+REV evaluates whether supplied evidence establishes a specified task's acceptance criteria. It does not authorize a merge or evaluate requirements that were omitted.
 
-## Inputs and result
+## Prepare a task
 
-Supply earlier step results through `steps`, dependency job results through `needs`, and captured logs or reports through `corpus-file` when needed. Use REV's default policy unless the repository explicitly defines another policy.
+Define observable acceptance criteria before implementing. Keep their source independently reviewed. Supply relevant code or diff and concrete behavioral observations or tests for each criterion, including negative paths. Green CI alone and author assertions are insufficient. Do not weaken criteria to fit the implementation.
 
-Read the step outputs `decision`, `approved`, and `reason`. Approval requires `decision=approve`, `approved=true`, and successful completion of the REV step. Missing outputs, denied decisions, and failed or incomplete evaluations block merging. The containing job must also succeed.
+Label the evidence with the current PR head SHA and generate it in trusted CI for that commit. The action validates the label, not the origin of its contents. The [reference](reference.md) defines both JSON manifests.
 
-REV is a workflow step, not a GitHub PR review. GitHub's check name comes from the containing job. Inspect the REV step's logs or outputs as well as the job result; do not infer approval from an unrelated green check.
+## Read a result
 
-## Merge procedure
+Use `decision`, `approved`, `head-sha`, `verified`, `total`, and the JSON report. Each criterion is `satisfied`, `violated`, or `unverified`. Supported verdicts cite a primary evidence item; inspect that source when investigating. Citations and verdicts are model outputs, not independent attestations.
 
-1. Read the PR's current head SHA, base branch, draft state, and mergeability.
-2. Verify REV approved in the check run associated with that head. Do not reuse a result from an earlier commit.
-3. Verify every applicable check completed successfully. A skipped REV gate blocks merging. A skipped unrelated check is acceptable only when repository policy permits it. Pending, cancelled, failed, or missing required checks block merging.
-4. Verify required reviews and branch rules are satisfied and the PR is ready to merge. Never use an admin bypass to turn a denial into a merge.
-5. Merge using the verified head SHA as a precondition. For GitHub CLI:
+An approval requires all of the following:
 
-   ```sh
-   gh pr merge <number> --repo <owner/repo> --squash --match-head-commit <verified-head-sha>
-   ```
+- `decision=approve` and `approved=true`.
+- Successful completion of the action and its containing `REV` job.
+- The report's `headSha` matches the current PR head, every criterion is satisfied, and `verified=total` with at least one criterion.
+- All other applicable checks, reviews, and branch rules are satisfied for the same head.
 
-6. Confirm the PR is merged and report its merge commit. If the head changed, reassess the new head before trying again.
+Missing reports, missing outputs, skipped evaluation, uncertainty, stale evidence, and errors block approval. A successful earlier check or an approval on an old commit does not apply to new work.
 
-Use the repository's permitted merge method if squash is unavailable. If checks are still running, use the host's monitoring integration and resume when they finish.
+## Respond to denial
 
-## Handle denial
+- `criteria-violated`: inspect the cited contradiction, repair the implementation, and produce fresh evidence.
+- `criteria-unverified`: inspect each unresolved criterion. Add relevant code and independent behavioral evidence, or clarify an ambiguous requirement through review.
+- CI failures: fix the failed operation first.
+- Input, credential, provider or timeout errors: repair the evaluation process; do not classify them as model judgments of the implementation.
 
-Use `reason` to decide what to inspect:
+Do not suppress failures, lower thresholds, weaken requirements, or repeatedly rerun unchanged denials to obtain approval. If you believe a model verdict is wrong, preserve the case as a labeled evaluation example and request human review.
 
-| Reason | Next action |
-| --- | --- |
-| `prior-step-failed`, `dependency-not-successful` | Inspect and fix the failed operation. |
-| `empty-corpus`, `invalid-corpus`, `invalid-corpus-file` | Repair evidence collection. |
-| `policy-denied`, `below-threshold` | Inspect the supplied evidence and policy; resolve the underlying issue. |
-| `missing-api-key`, `api-timeout`, `api-unavailable`, `api-http-<status>` | Repair configuration or investigate provider availability before rerunning. |
-| Any other error or missing result | Stop the merge and inspect the gate failure. |
+## Merge only when authorized
 
-Do not lower thresholds, replace the policy, suppress failures, or repeatedly rerun an unchanged model denial just to obtain approval. See the [reference](reference.md#outputs) for the complete output contract.
+Re-read the current head, readiness and checks, then merge with a head precondition:
+
+```sh
+gh pr merge <number> --repo <owner/repo> --squash --match-head-commit <verified-head-sha>
+```
+
+Use the repository's permitted merge method. Confirm the merge and report the merge commit. If the head changes, reevaluate it. Never bypass repository rules to turn a denial into a merge.

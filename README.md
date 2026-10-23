@@ -2,56 +2,96 @@
 
 # REV
 
-**An approve/deny gate for pull requests. Built for humans and agents.**
+**Did the agent accomplish the task?**
 
-Run your checks. REV reviews the recorded results with [TypeSafe AI's Jev](https://docs.typesafe.ai/introduction) and returns one decision. A human or an authorized agent handles the merge.
+REV evaluates a change against explicit acceptance criteria and publishes one final GitHub check. It uses [TypeSafe AI's Jev](https://docs.typesafe.ai/introduction) to judge supplied code and behavioral evidence. Green CI is a prerequisite, not the answer.
 
-## Add the gate
+**Status: experimental.** REV's mechanics are tested. Its ability to detect real agent mistakes is not established. Start with a check that is not required for merging; measure its mistakes before making it a merge gate.
 
-Save `TYPESAFE_API_KEY` as a GitHub Actions secret. Add REV as the last step of your checks job:
+## One check, an inspectable report
 
-```yaml
-- name: REV
-  id: rev
-  if: ${{ !cancelled() }}
-  uses: aviarytech/rev@main
-  with:
-    api-key: ${{ secrets.TYPESAFE_API_KEY }}
-    steps: ${{ toJSON(steps) }}
-```
-
-For production, replace `main` with a reviewed full commit SHA from this repository. Give earlier steps IDs so GitHub includes their results. Make the containing job a required check in your repository's branch rules to enforce the gate.
-
-No prompt to write. REV uses the same default policy before tests and after builds: judge the operations recorded so far. Successful operations with consistent evidence approve; failures, contradictions, and missing recorded-command logs deny. Operations not yet recorded are not required.
-
-To include captured logs or reports, add `corpus-file: path/to/evidence.txt`. For a separate final job, declare its dependencies and pass `needs: ${{ toJSON(needs) }}`. GitHub does not automatically provide every action's inputs or logs; see the [evidence reference](docs/reference.md#corpus) for complete capture.
-
-## Read the decision
-
-Humans get a GitHub job summary and a log line:
+Example report, abbreviated:
 
 ```text
-REV: approve (policy-satisfied)
+REV: deny — 1/2 acceptance criteria verified
+
+anonymous      violated    behavior: observations.json
+  Anonymous requests must return 401; supplied behavior contradicts the criterion.
+authenticated  satisfied   behavior: observations.json
 ```
 
-Agents get stable step outputs:
+Each criterion receives `satisfied`, `violated`, or `unverified`, with a primary evidence reference for supported verdicts. These are model judgments and model-selected citations, not proofs. The JSON report and job summary expose the individual results.
 
-| Output | Meaning |
-| --- | --- |
-| `decision` | `approve` or `deny` |
-| `approved` | `true` or `false` as a string |
-| `reason` | A stable reason code, such as `policy-satisfied` or `prior-step-failed` |
+REV approves only when every criterion is judged satisfied with sufficient confidence and a citation, and the supplied CI results pass. Missing evidence, uncertainty, errors, or stale evidence deny. REV does not merge PRs.
 
-Approval exits successfully. Denial and errors fail the step. Keep the normal failure behavior so the gate blocks the job.
+## Three inputs
 
-## Merge after approval
+**1. The task.** Write observable requirements before implementation. Store them in a reviewed task manifest:
 
-REV supplies the decision. Your human or agent merges only after **all applicable checks pass on the current PR head**, including REV, and required reviews and branch rules are satisfied. An earlier approval does not cover new commits.
+```json
+{
+  "version": 1,
+  "task": "Protect the export endpoint.",
+  "criteria": [
+    { "id": "anonymous", "description": "An anonymous GET /export returns HTTP 401 and no export data." },
+    { "id": "authenticated", "description": "An authenticated GET /export returns HTTP 200 with export data." }
+  ]
+}
+```
 
-For agent integration, use the [merge contract](docs/agents.md). REV itself does not merge or submit a GitHub review.
+**2. Implementation and behavior.** Supply an evidence manifest containing the PR head SHA and named code, diff, test, or behavioral observations. Include both implementation and behavioral evidence relevant to each criterion. A green test count or an author's assertion is insufficient. See the [evidence format and collector](docs/reference.md#evidence).
 
-## Small by default
+**3. CI results.** Put REV in a final job depending on every applicable check job:
 
-One inference request, no retries, no runtime dependencies, and a 10-second default deadline. The default prompt approved both checkpoints in the TV integration in roughly 180–300 ms of gate execution; that is an observed sample, not a latency guarantee. Errors deny. Evidence is sent to TypeSafe; include only data you intend to send there.
+```yaml
+rev:
+  name: REV
+  needs: [check]
+  if: ${{ !cancelled() }}
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: acceptance-evidence
+    - uses: aviarytech/rev@main # Pin a reviewed full commit SHA in production.
+      with:
+        api-key: ${{ secrets.TYPESAFE_API_KEY }}
+        task-file: .rev/task.json
+        evidence-file: evidence.json
+        head-sha: ${{ github.event.pull_request.head.sha }}
+        needs: ${{ toJSON(needs) }}
+```
 
-Optional policies, thresholds, evidence capture, all outputs, and development commands live in the [reference](docs/reference.md).
+This snippet assumes the `check` job uploads `evidence.json` as `acceptance-evidence` and the repository supplies `.rev/task.json`. See the [integration guide](docs/integration.md) before handling untrusted PRs. If evidence collection fails, the final job fails rather than turning green through a skipped evaluation.
+
+Save `TYPESAFE_API_KEY` as an Actions secret. Evidence is sent to TypeSafe. GitHub's log masking does not redact the request; exclude credentials and data you do not intend to send.
+
+## Test the idea
+
+The [export example](examples/export/task.json) and [synthetic evaluation suite](docs/evaluation.md) challenge REV with:
+
+- A correct implementation.
+- A missing authentication guard despite green CI.
+- Passing tests that repeat the implementation's mistake.
+- Missing behavioral evidence, an author claim, and injected approval instructions.
+
+```sh
+npm run check
+npm test         # Mocked transport and deterministic behavior; no API key needed.
+npm run eval    # Live Jev judgments; requires TYPESAFE_API_KEY in the environment.
+```
+
+Local unit tests do not measure model accuracy. The live suite reports false approvals, false denials, criterion mismatches and API errors. These six synthetic cases are a starting point, not a benchmark of real-world reliability. No live results for this approach are claimed yet.
+
+## Small interface
+
+One API request with typed verdict and citation questions per criterion, no retries, no runtime dependencies. Default deadline: 10 seconds. This acceptance evaluator has no measured latency yet; timings from REV's earlier CI-consistency prototype do not apply.
+
+- [Input/output reference](docs/reference.md)
+- [PR integration and trust boundaries](docs/integration.md)
+- [Agent merge contract](docs/agents.md)
+- [Evaluation methodology](docs/evaluation.md)
+- [Migration from the CI-consistency prototype](docs/migration.md)
+
+REV does not currently create acceptance criteria, run an autonomous reviewer, discover the full repository, or collect all workflow history. You supply the task and evidence; Jev evaluates them.

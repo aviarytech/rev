@@ -1,0 +1,5 @@
+[
+  { "id": "implementation", "kind": "code", "path": "examples/export/route.js" },
+  { "id": "tests", "kind": "test", "path": "example-tests.log" },
+  { "id": "behavior", "kind": "behavior", "path": "example-observations.json" }
+]
