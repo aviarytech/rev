@@ -22,6 +22,7 @@ export function buildCorpus(task, evidence, raw = {}, env = {}) {
     || evidence.items.some(e => !object(e) || !id(e.id) || !text(e.source, 500)
       || !['diff', 'code', 'test', 'behavior', 'report'].includes(e.kind) || !text(e.content, MAX_BYTES))
     || new Set(evidence.items.map(e => e.id)).size !== evidence.items.length) throw new GateError('invalid-evidence');
+  if (task.criteria.length * (evidence.items.length + 1) > 100) throw new GateError('too-many-assessments');
   if (!sha(raw['head-sha'])) throw new GateError('invalid-head-sha');
   if (raw['head-sha'] !== evidence.headSha) throw new GateError('stale-evidence');
   const corpus = {

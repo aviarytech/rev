@@ -10,7 +10,7 @@ Label the evidence with the current PR head SHA and generate it in trusted CI fo
 
 ## Read a result
 
-Use `decision`, `approved`, `head-sha`, `verified`, `total`, and the JSON report. Each criterion is `satisfied`, `violated`, or `unverified`. Supported verdicts cite a primary evidence item; inspect that source when investigating. Citations and verdicts are model outputs, not independent attestations.
+Use `decision`, `approved`, `head-sha`, `verified`, `total`, and the JSON report. Each criterion is `satisfied`, `violated`, or `unverified`. Supported verdicts cite evidence items; inspect those sources when investigating. The report retains the raw model verdict and each independent evidence relationship, including uncertain judgments. Citations and verdicts are model outputs, not independent attestations.
 
 An approval requires all of the following:
 

@@ -37,9 +37,9 @@ Use concrete externally observable requirements. "Looks good" is not a useful cr
 
 The SHA must be the exact 40-character lowercase PR head SHA and match the `head-sha` action input. This rejects a mismatched label; it does not authenticate who produced evidence or prove that file contents belong to that commit. Use trusted CI collectors and artifacts from the same run. Do not relabel old evidence with a new SHA.
 
-Up to 40 items, with the same ID rules as criteria. Kinds: `diff`, `code`, `test`, `behavior`, `report`. `source` is a nonempty label up to 500 characters, preferably a path and line or a report identifier. It is not fetched or resolved by REV. `content` must contain the actual evidence, not a URL the model cannot access. Empty item lists deny.
+Up to 40 items, subject to `criteria × (items + 1) ≤ 100` to bound the number of model questions, with the same ID rules as criteria. Kinds: `diff`, `code`, `test`, `behavior`, `report`. `source` is a nonempty label up to 500 characters, preferably a path and line or a report identifier. It is not fetched or resolved by REV. `content` must contain the actual evidence, not a URL the model cannot access. Empty item lists deny.
 
-The evaluator requires code/diff evidence and concrete test/behavior evidence exercising each criterion. It checks for wrong expectations and contradictions; no guarantee of detecting them is established. One primary citation is selected per supported criterion, while all supplied items are available for judgment. No generated rationale or source quotation is returned. The report combines the criterion, verdict, reason code, and citation so a reviewer can inspect the original evidence.
+The evaluator requires code/diff evidence and concrete test/behavior evidence exercising each criterion. It checks for wrong expectations and contradictions; no guarantee of detecting them is established. Each item is independently judged as supporting, contradicting, or irrelevant to each criterion. Multiple sources can support a criterion together. No generated rationale or source quotation is returned. The report combines the criterion, verdict, reason code, and references so a reviewer can inspect the original evidence.
 
 The combined corpus is capped at 1 MiB; each input file is also bounded before parsing. Oversized inputs deny, never truncate. These are memory bounds, not guarantees of fitting the model context. Context-limit errors deny.
 
@@ -75,14 +75,11 @@ Failures and cancellations, including step failures masked by `continue-on-error
 
 ## Model and aggregation
 
-One POST to TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one), with no retries. For each criterion, two typed Choice questions request:
+One POST to TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one), with no retries. Each criterion has a typed Choice verdict question (`satisfied`, `violated`, `unverified`) and a separate question for every evidence item (`supports`, `contradicts`, `irrelevant`). Evidence items do not compete for a single citation slot.
 
-1. `satisfied`, `violated`, or `unverified`.
-2. A primary evidence ID, or `none`.
+Each question sees the task and full supplied corpus. Returned distributions and choices are validated. A satisfied verdict requires its own probability/confidence thresholds, accepted supporting implementation and behavioral references, and no accepted contradicting reference. A violated verdict requires its thresholds and at least one accepted contradiction. Each relationship must independently meet the same thresholds to be accepted. Otherwise the reported criterion is `unverified`. Approval is a deterministic conjunction of all satisfied verdicts after the CI preflight.
 
-Each question sees the task and full supplied corpus. Returned distributions and choices are validated. Satisfied or violated verdicts require an existing evidence citation and both questions to meet both thresholds. Otherwise the reported criterion is `unverified`. Approval is a deterministic conjunction of all satisfied verdicts after the CI preflight.
-
-These two model answers can be inconsistent. A missing citation prevents satisfaction, but selecting a real item does not prove that it supports the claim. The live evaluation suite tests that judgment. Confidence and probability describe model outputs; they are not independently calibrated correctness guarantees.
+The report preserves raw verdicts and all relationship assessments for diagnosis. A relation's probability measures support/contradiction/irrelevance, not which of several equally useful sources is "best." Conflicting model answers prevent satisfaction. Selecting real items still does not prove that their contents support the claim; the live suite tests those judgments. Confidence and probability are not independently calibrated correctness guarantees.
 
 ## Outputs
 
@@ -97,12 +94,12 @@ These two model answers can be inconsistent. A missing citation prevents satisfa
 | `model` | Returned model ID, empty before successful inference. |
 | `duration-ms` | Execution duration before report publication. |
 
-The report has `version: 2`, the decision fields, `headSha`, and `criteria`. Each criterion includes its `id`, `description`, `verdict`, `reason`, and either `evidence: null` or `{id, kind, source}`. Model-evaluated criteria also include verdict and citation probability/confidence values. These probabilities refer to the selected raw model choices, which may have been downgraded to `unverified`.
+The report has `version: 3`, the decision fields, `headSha`, and `criteria`. Each criterion includes `id`, `description`, `verdict`, `reason`, and an `evidence` array of accepted references (`{id, kind, source, relation}`). An empty array means no relationship met the thresholds. Model-evaluated criteria also include `modelVerdict`, its selected-choice `probability` and `confidence`, and `evidenceAssessments` with every relationship, its scores, and `accepted`. A raw verdict can be downgraded to `unverified` by the deterministic aggregator.
 
 Evidence content and provider response bodies are not logged or copied to reports. Criterion descriptions and source labels are included and must be suitable for publication. Protect the original evidence artifact according to your repository's access policy. Masking logs does not remove secrets from TypeSafe payloads.
 
-Normal reasons: `criteria-verified`, `criteria-violated`, `criteria-unverified`. Criterion reasons: `evidence-supports-criterion`, `evidence-contradicts-criterion`, `insufficient-evidence`, `below-threshold`.
+Normal reasons: `criteria-verified`, `criteria-violated`, `criteria-unverified`. Criterion reasons: `evidence-supports-criterion`, `evidence-contradicts-criterion`, `insufficient-evidence`, `below-threshold`, `contradictory-evidence`.
 
-Preflight and error reasons: `ci-not-successful`, `missing-ci-results`, `missing-evidence`, `missing-input`, `invalid-file`, `invalid-task`, `invalid-evidence`, `invalid-context`, `invalid-head-sha`, `stale-evidence`, `evidence-too-large`, `invalid-step`, `invalid-step-status`, `invalid-job-status`, `invalid-configuration`, `missing-api-key`, `invalid-response`, `response-too-large`, `api-timeout`, `api-unavailable`, `api-http-<status>`, `internal-error`.
+Preflight and error reasons: `ci-not-successful`, `missing-ci-results`, `missing-evidence`, `missing-input`, `invalid-file`, `invalid-task`, `invalid-evidence`, `invalid-context`, `invalid-head-sha`, `stale-evidence`, `too-many-assessments`, `evidence-too-large`, `invalid-step`, `invalid-step-status`, `invalid-job-status`, `invalid-configuration`, `missing-api-key`, `invalid-response`, `response-too-large`, `api-timeout`, `api-unavailable`, `api-http-<status>`, `internal-error`.
 
 Approval exits 0; denial or error exits 1. Reporting failures also exit 1 and must not be treated as approval. No arbitrary policy replacement is supported in this version: the acceptance criteria define the task, and the evaluation rules stay fixed.

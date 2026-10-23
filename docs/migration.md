@@ -15,3 +15,7 @@ This is a breaking change on `main`. Existing integrations pinned to an earlier 
 - Remove the TV-specific `collect-evidence.js` collector and old CI-consistency fixtures. The optional `scripts/evidence.js` helper packages explicit source files.
 
 Publish a separate final job named `REV`. Start with it nonrequired, preserve its report on denial, and validate its judgment against known good and bad solutions before enforcing it. This release does not migrate TV or alter any repository's branch rules automatically.
+
+## Acceptance-report revision 3
+
+The first acceptance prototype chose one primary citation per criterion. Equally useful sources split that choice's probability, creating false uncertainty about evidence selection. Report version 3 assesses each source independently and returns an evidence array, raw model verdict and all relationship assessments. It retains the existing thresholds and requires accepted implementation and behavioral support for satisfaction; a confident contradiction prevents approval. Consumers of version 2's single `evidence` object must update deliberately.

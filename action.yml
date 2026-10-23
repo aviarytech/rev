@@ -30,10 +30,10 @@ inputs:
     description: TypeSafe model ID. Changes require reevaluation.
     default: jev-1.14.0
   min-probability:
-    description: Minimum probability for both the verdict and primary citation.
+    description: Minimum probability for the verdict and each evidence relationship.
     default: '0.9'
   min-confidence:
-    description: Minimum Choice confidence for both the verdict and primary citation.
+    description: Minimum Choice confidence for the verdict and each evidence relationship.
     default: '0.8'
   timeout-ms:
     description: API deadline in milliseconds (100–60000). One request, no retries.
@@ -48,7 +48,7 @@ outputs:
   head-sha:
     description: Commit evaluated. Empty if input validation failed.
   verified:
-    description: Number of criteria judged satisfied with sufficient confidence and a citation.
+    description: Number of criteria judged satisfied with sufficient confidence and supporting implementation and behavioral references.
   total:
     description: Number of acceptance criteria in the validated task.
   report-file:

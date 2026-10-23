@@ -40,10 +40,10 @@ test('entrypoint reports criterion verdicts, safe summaries, errors and exit sta
         const output = await readFile(env.GITHUB_OUTPUT, 'utf8');
         assert.equal(value(output, 'approved'), String(scenario === 'approve'));
         const report = JSON.parse(await readFile(env['INPUT_REPORT-FILE'], 'utf8'));
-        assert.equal(report.version, 2);
+        assert.equal(report.version, 3);
         if (scenario === 'approve') {
           assert.equal(value(output, 'verified'), '2');
-          assert.equal(report.criteria[0].evidence.id, 'probe');
+          assert.equal(report.criteria[0].evidence[1].id, 'probe');
         }
         const summary = await readFile(env.GITHUB_STEP_SUMMARY, 'utf8');
         assert.match(summary, /REV: (approve|deny)/);

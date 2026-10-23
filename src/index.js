@@ -25,7 +25,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
     const reason = error instanceof GateError ? error.code : 'internal-error';
     result = corpus ? blockedResult(corpus, reason) : { decision: 'deny', approved: false, reason, criteria: [] };
   }
-  result.version = 2;
+  result.version = 3;
   result['duration-ms'] = Math.round(performance.now() - start);
   const reportFile = raw['report-file'] || 'rev-report.json';
   // Write the report before approval outputs: a reporting failure must not publish approval.

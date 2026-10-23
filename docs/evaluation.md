@@ -37,3 +37,9 @@ Collect real tasks, reviewed acceptance criteria and independently labeled imple
 Compare REV with ordinary CI and deterministic checks that could catch the same problem. Measure the added detections and review burden, not just total approvals. Repeat across unchanged inputs to characterize variability; use those repetitions as a planned experiment, never as approval shopping.
 
 Record the action commit, model ID, task/evidence revisions, thresholds and results for each experiment. Set acceptable error limits according to the consequences of a bad merge. Until that evidence exists, leave REV nonrequired and have humans inspect its reports.
+
+## First live integration observation
+
+TV PR #17's first documentation trial used action commit `38028d6` and report revision 2. Ordinary CI passed, but both acceptance criteria were unverified. The first criterion's selected verdict probability was 0.98 while its primary-citation probability was 0.89; the second was 0.88 and 0.45 respectively. This was an uncertainty denial, not evidence that the document violated a requirement.
+
+Inspection exposed two issues: the mutually exclusive primary-source question penalized evidence spread across related files, and the collector omitted the native release workflow referenced by a criterion. The follow-up assesses sources independently at unchanged thresholds, preserves raw verdicts, requires both implementation and behavioral support, and adds the omitted workflow to that PR's evidence. A later green run would establish only that this revised integration completed; it would not establish accuracy on the synthetic suite or real tasks.

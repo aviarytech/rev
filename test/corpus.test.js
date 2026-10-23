@@ -26,3 +26,8 @@ test('aggregate evidence is bounded and never silently truncated', () => {
   const e = evidence(); e.items[0].content = 'x'.repeat(1024 * 1024);
   assert.throws(() => buildCorpus(task, e, { 'head-sha': HEAD }), /evidence-too-large/);
 });
+test('bounds the criterion-by-evidence question count', () => {
+  const many = { ...task, criteria: Array.from({ length: 20 }, (_, i) => ({ id: `c${i}`, description: 'required behavior' })) };
+  const items = Array.from({ length: 5 }, (_, i) => ({ id: `e${i}`, kind: 'code', source: 'file', content: 'code' }));
+  assert.throws(() => buildCorpus(many, { version: 1, headSha: HEAD, items }, { 'head-sha': HEAD }), /too-many-assessments/);
+});

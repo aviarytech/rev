@@ -20,9 +20,9 @@ anonymous      violated    behavior: observations.json
 authenticated  satisfied   behavior: observations.json
 ```
 
-Each criterion receives `satisfied`, `violated`, or `unverified`, with a primary evidence reference for supported verdicts. These are model judgments and model-selected citations, not proofs. The JSON report and job summary expose the individual results.
+Each criterion receives `satisfied`, `violated`, or `unverified`, with evidence references for supported verdicts. Multiple sources can support a criterion together. These are model judgments and model-selected citations, not proofs. The JSON report and job summary expose the individual results.
 
-REV approves only when every criterion is judged satisfied with sufficient confidence and a citation, and the supplied CI results pass. Missing evidence, uncertainty, errors, or stale evidence deny. REV does not merge PRs.
+REV approves only when every criterion is judged satisfied with sufficient confidence and supporting implementation and behavioral references, and the supplied CI results pass. Missing evidence, uncertainty, errors, or stale evidence deny. REV does not merge PRs.
 
 ## Three inputs
 
@@ -86,7 +86,7 @@ Local unit tests do not measure model accuracy. The live suite reports false app
 
 ## Small interface
 
-One API request with typed verdict and citation questions per criterion, no retries, no runtime dependencies. Default deadline: 10 seconds. This acceptance evaluator has no measured latency yet; timings from REV's earlier CI-consistency prototype do not apply.
+One API request with typed verdict questions and independent evidence-relationship questions per criterion, no retries, no runtime dependencies. Default deadline: 10 seconds. This acceptance evaluator has no measured latency yet; timings from REV's earlier CI-consistency prototype do not apply.
 
 - [Input/output reference](docs/reference.md)
 - [PR integration and trust boundaries](docs/integration.md)

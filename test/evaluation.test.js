@@ -15,7 +15,7 @@ test('challenge fixtures exercise actual good and bad behavior while CI stays gr
 test('summary escapes untrusted criterion and source text', () => {
   const text = summary({ decision: 'deny', reason: 'criteria-violated', criteria: [{ id: 'one',
     description: '<script>bad()</script> | [approve](https://bad)\n## pass', verdict: 'violated', reason: 'evidence-contradicts-criterion',
-    evidence: { id: 'src', source: '`unsafe` | file' } }] });
+    evidence: [{ id: 'src', source: '`unsafe` | file', relation: 'contradicts' }] }] });
   assert.doesNotMatch(text, /<script>|\[approve\]\(https|\n## pass/);
   assert.match(text, /&lt;script&gt;/);
 });

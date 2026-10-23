@@ -13,15 +13,15 @@ test('one Choice request evaluates each requirement and selects real evidence ID
     assert.equal(options.redirect, 'error');
     const body = JSON.parse(options.body);
     assert.deepEqual(body.state, data);
-    assert.deepEqual(Object.keys(body.questions), ['criterion_0', 'evidence_0', 'criterion_1', 'evidence_1']);
-    assert.deepEqual(Object.keys(body.questions.evidence_0.criteria), ['none', 'code', 'probe']);
+    assert.deepEqual(Object.keys(body.questions), ['criterion_0', 'support_0_0', 'support_0_1', 'criterion_1', 'support_1_0', 'support_1_1']);
+    assert.deepEqual(Object.keys(body.questions.support_0_0.criteria), ['supports', 'contradicts', 'irrelevant']);
     assert.match(body.questions.criterion_0.instructions.rules, /Tests can encode the same mistake/);
     return Response.json(response());
   });
   assert.equal(calls, 1);
   assert.equal(result.approved, true);
   assert.equal(result.headSha, data.headSha);
-  assert.deepEqual(result.criteria[0].evidence, { id: 'probe', kind: 'behavior', source: 'probe.json' });
+  assert.deepEqual(result.criteria[0].evidence.map(e => e.id), ['code', 'probe']);
   assert.equal(JSON.stringify(result).includes('PRIVATE_EVIDENCE'), false);
 });
 test('a single violated or unverifiable criterion denies otherwise green CI', () => {
@@ -31,27 +31,44 @@ test('a single violated or unverifiable criterion denies otherwise green CI', ()
     assert.equal(result.criteria[0].verdict, verdict);
   }
 });
-test('no citation or low confidence cannot produce satisfaction', () => {
+test('missing supporting evidence or uncertain verdicts cannot produce satisfaction', () => {
+  const noSupport = response(undefined, [['irrelevant', 'irrelevant'], ['supports', 'supports']]);
+  assert.equal(decisionFromResponse(noSupport, config, corpus()).approved, false);
   for (const mutate of [
-    r => { r.answers.evidence_0 = response(['satisfied'], ['none']).answers.evidence_0; },
     r => { r.answers.criterion_0.confidence = 0.79; },
-    r => { r.answers.evidence_0.confidence = 0.79; },
+    r => { r.answers.support_0_0.confidence = 0.79; r.answers.support_0_1.confidence = 0.79; },
     r => { r.answers.criterion_0.probabilities = { satisfied: 0.89, violated: 0.06, unverified: 0.05 }; },
-    r => { r.answers.evidence_0.probabilities = { probe: 0.89, code: 0.06, none: 0.05 }; },
   ]) {
     const r = response(); mutate(r);
     const result = decisionFromResponse(r, config, corpus());
     assert.equal(result.approved, false);
     assert.equal(result.criteria[0].verdict, 'unverified');
+    assert.equal(result.criteria[0].modelVerdict, 'satisfied');
   }
   const r = response();
-  for (const a of Object.values(r.answers)) { a.confidence = 0.8; const keys = Object.keys(a.probabilities); a.probabilities = Object.fromEntries(keys.map(k => [k, k === a.choice ? 0.9 : 0.05])); }
+  for (const a of Object.values(r.answers)) {
+    a.confidence = 0.8;
+    a.probabilities = Object.fromEntries(Object.keys(a.probabilities).map(k => [k, k === a.choice ? 0.9 : 0.05]));
+  }
   assert.equal(decisionFromResponse(r, config, corpus()).approved, true);
 });
-test('rejects fabricated citations, missing verdicts and malformed distributions', () => {
+test('multiple supporting sources do not compete and a contradiction blocks approval', () => {
+  const supported = decisionFromResponse(response(), config, corpus());
+  assert.equal(supported.approved, true);
+  assert.equal(supported.criteria[0].evidence.length, 2);
+  const conflict = decisionFromResponse(response(undefined, [['supports', 'contradicts']]), config, corpus());
+  assert.equal(conflict.approved, false);
+  assert.equal(conflict.criteria[0].reason, 'contradictory-evidence');
+  const codeOnly = decisionFromResponse(response(undefined, [['supports', 'irrelevant']]), config, corpus());
+  assert.equal(codeOnly.approved, false);
+  // A model violation without a concrete contradiction is not established either.
+  const unsupported = decisionFromResponse(response(['violated', 'satisfied'], [['irrelevant', 'irrelevant']]), config, corpus());
+  assert.equal(unsupported.criteria[0].verdict, 'unverified');
+});
+test('rejects missing assessments and malformed distributions', () => {
   for (const mutate of [
-    r => { delete r.answers.criterion_1; }, r => { delete r.answers.evidence_1; },
-    r => { r.answers.evidence_0.choice = 'invented'; },
+    r => { delete r.answers.criterion_1; }, r => { delete r.answers.support_1_1; },
+    r => { r.answers.support_0_0.choice = 'invented'; },
     r => { r.answers.criterion_0.probabilities.violated = 0.5; },
     r => { r.answers.criterion_0.confidence = Infinity; },
     r => { r.answers.criterion_0.probabilities.satisfied = '0.98'; },
