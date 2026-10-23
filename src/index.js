@@ -11,10 +11,10 @@ const escapeCommand = x => String(x).replaceAll('%', '%25').replaceAll('\r', '%0
 export async function run(env = process.env, fetchImpl = fetch) {
   const start = performance.now();
   const raw = Object.fromEntries(names.map(n => [n, env[`INPUT_${n.toUpperCase()}`] || '']));
-  let result, corpus;
+  let result, corpus, config;
   try {
     if (!raw['task-file'] || !raw['evidence-file']) throw new GateError('missing-input');
-    const config = configuration(raw);
+    config = configuration(raw);
     const task = await readJson(raw['task-file']);
     const evidence = await readJson(raw['evidence-file']);
     corpus = buildCorpus(task, evidence, raw, env);
@@ -25,6 +25,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
     const reason = error instanceof GateError ? error.code : 'internal-error';
     result = corpus ? blockedResult(corpus, reason) : { decision: 'deny', approved: false, reason, criteria: [] };
   }
+  if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
   result.version = 3;
   result['duration-ms'] = Math.round(performance.now() - start);
   const reportFile = raw['report-file'] || 'rev-report.json';

@@ -19,3 +19,18 @@ test('summary escapes untrusted criterion and source text', () => {
   assert.doesNotMatch(text, /<script>|\[approve\]\(https|\n## pass/);
   assert.match(text, /&lt;script&gt;/);
 });
+test('summary exposes criterion and source scores without rounding at a threshold', () => {
+  const text = summary({ decision: 'deny', reason: 'criteria-unverified', model: 'jev-1.14.0', 'duration-ms': 390,
+    thresholds: { probability: 0.9, confidence: 0.8 }, criteria: [{ id: 'accuracy', description: 'Verify accuracy',
+      verdict: 'unverified', modelVerdict: 'satisfied', probability: 0.8999, confidence: 0.88,
+      reason: 'below-threshold', evidence: [], evidenceAssessments: [
+        { id: 'guide', source: 'guide.md', relation: 'supports', probability: 0.95, confidence: 0.92, accepted: true },
+        { id: 'scripts', source: 'package.json', relation: 'supports', probability: 0.89, confidence: 0.83, accepted: false },
+      ] }] });
+  assert.match(text, /accuracy \| unverified \| satisfied \| 0\.8999 \| 0\.88/);
+  assert.match(text, /guide \| guide\.md \| supports \| 0\.95 \| 0\.92 \| yes/);
+  assert.match(text, /scripts \| package\.json \| supports \| 0\.89 \| 0\.83 \| no/);
+  assert.match(text, /probability ≥ 0\.9 · confidence ≥ 0\.8/);
+  assert.match(text, /jev-1\.14\.0 · Duration: 390 ms/);
+  assert.match(summary({ decision: 'deny', reason: 'missing-input', criteria: [] }), /not evaluated/);
+});
