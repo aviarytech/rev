@@ -28,6 +28,17 @@ Missing reports, missing outputs, skipped evaluation, uncertainty, stale evidenc
 - CI failures: fix the failed operation first.
 - Input, credential, provider or timeout errors: repair the evaluation process; do not classify them as model judgments of the implementation.
 
+The JSON report's `guidance` and the job summary's **Next steps** give deterministic follow-up suggestions based on the gate result. They are investigation steps, not model explanations or a guarantee of approval. Missing accepted support means the model did not accept the supplied evidence; it does not prove the code is missing.
+
+### Review before escalating
+
+1. Read the exact unresolved criterion, raw model choice, final reason, and every source assessment. A raw `satisfied` choice can still fail thresholds or lack accepted support. Approval requires accepted supporting code/diff and behavior/test evidence, no accepted contradiction, and a satisfied criterion choice meeting both thresholds.
+2. Trace the production entry point through the control, event handler, state change and API or mutation boundary. Check each obligation and relevant invalid inputs, alternate entry paths and bypasses. Passing tests may exercise only a control or repeat the implementation's assumptions.
+3. Try to reproduce an uncovered case. For example, a form's click test can pass because the browser validates required fields, while another supported submit path reaches a mutation without validation. Inspect whether that path can occur and whether the handler enforces the required behavior. Do not assume every form needs an extra guard.
+4. When you find a defect, add a regression that fails before the fix and passes afterward. Assert the unwanted side effect does not happen and the valid path still performs the intended operation. Repair the implementation, then capture the actual handler, relevant surrounding source, and expected versus observed results.
+5. If implementation support is missing, supply the relevant production code rather than more passing test counts. If behavioral support is missing, exercise the real path and relevant negative cases. Regenerate evidence for the current head after meaningful changes.
+6. If review finds no defect, document the paths inspected and concrete reproduction results. Clarify genuinely ambiguous requirements through review. Preserve a labeled evaluation case and request human review if the evidence still contradicts REV; do not stop at “tests pass, so the evaluator is wrong.”
+
 Do not suppress failures, lower thresholds, weaken requirements, or repeatedly rerun unchanged denials to obtain approval. If you believe a model verdict is wrong, preserve the case as a labeled evaluation example and request human review.
 
 ## Merge only when authorized

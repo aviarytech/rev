@@ -52,6 +52,12 @@ test('entrypoint reports criterion verdicts, safe summaries, errors and exit sta
         }
         const summary = await readFile(env.GITHUB_STEP_SUMMARY, 'utf8');
         assert.match(summary, /REV: (approve|deny)/);
+        assert.equal(report.guidance.kind, scenario === 'approve' ? 'none'
+          : ['violated', 'unverified'].includes(scenario) ? 'review-required' : 'evaluation-blocked');
+        if (scenario !== 'approve') {
+          assert.match(summary, /### Next steps/);
+          assert.match(child.stdout, /REV next steps:/);
+        }
         assert.doesNotMatch(child.stdout + child.stderr + output + summary + JSON.stringify(report), /PRIVATE_EVIDENCE|PRIVATE_PROVIDER_RESPONSE/);
       } finally { await rm(dir, { recursive: true, force: true }); }
     });
