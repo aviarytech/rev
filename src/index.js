@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { buildCorpus } from './corpus.js';
 import { configuration, evaluate, blockedResult, GateError } from './gate.js';
 import { readJson } from './io.js';
+import { guidance } from './guidance.js';
 import { summary } from './report.js';
 const names = ['api-key', 'task-file', 'evidence-file', 'head-sha', 'steps', 'needs',
   'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file'];
@@ -27,6 +28,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
     if (error instanceof GateError && error.diagnostics) result.diagnostics = error.diagnostics;
   }
   if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
+  result.guidance = guidance(result);
   result.version = 3;
   result['duration-ms'] = Math.round(performance.now() - start);
   const reportFile = raw['report-file'] || 'rev-report.json';
@@ -44,6 +46,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
   }
   if (result.diagnostics) process.stdout.write(`REV diagnostics: ${JSON.stringify(result.diagnostics)}\n`);
   process.stdout.write(`REV: ${result.decision} (${result.reason})\n`);
+  if (!result.approved) process.stdout.write('REV next steps: inspect guidance in the JSON report and Next steps in the job summary before retrying.\n');
   if (!result.approved) process.stdout.write(`::error::REV denied: ${result.reason}\n`);
   return result;
 }
