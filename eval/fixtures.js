@@ -2,10 +2,10 @@ import { buildCorpus } from '../src/corpus.js';
 export const HEAD = 'a'.repeat(40);
 export const task = {
   version: 1,
-  task: 'Protect the export endpoint: only authenticated users can export.',
+  task: 'Check the supplied route(session) function using the supplied execution results.',
   criteria: [
-    { id: 'anonymous', description: 'An anonymous GET /export returns HTTP 401 and no export data.' },
-    { id: 'authenticated', description: 'An authenticated GET /export returns HTTP 200 with export data.' },
+    { id: 'anonymous', description: 'Calling route(null) returns an object with status 401 and body null.' },
+    { id: 'authenticated', description: 'Calling route({ user: "alice" }) returns an object with status 200 and body "export data".' },
   ],
 };
 const good = 'export function route(session) { if (!session) return { status: 401, body: null }; return { status: 200, body: "export data" }; }';

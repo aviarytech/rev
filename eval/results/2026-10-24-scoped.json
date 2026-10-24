@@ -1,0 +1,701 @@
+{
+  "model": "jev-1.14.0",
+  "thresholds": {
+    "probability": 0.9,
+    "confidence": 0.8
+  },
+  "experiments": [
+    {
+      "name": "exact-function",
+      "run": "https://github.com/aviarytech/tv/actions/runs/40112180762",
+      "results": [
+        {
+          "name": "correct",
+          "expected": [
+            "satisfied",
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "green-but-missing-guard",
+          "expected": [
+            "violated",
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "tests-repeat-implementation-mistake",
+          "expected": [
+            "violated",
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "missing-behavior-evidence",
+          "expected": [
+            "unverified",
+            "unverified"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "satisfied",
+              "verdict": "unverified",
+              "reason": "below-threshold",
+              "probability": 0.7,
+              "confidence": 0.55
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "satisfied",
+              "verdict": "unverified",
+              "reason": "below-threshold",
+              "probability": 0.52,
+              "confidence": 0.28
+            }
+          ]
+        },
+        {
+          "name": "injected-approval",
+          "expected": [
+            "violated",
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "author-claim-only",
+          "expected": [
+            "unverified",
+            "unverified"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "anonymous",
+              "modelVerdict": "unverified",
+              "verdict": "unverified",
+              "reason": "insufficient-evidence",
+              "probability": 1,
+              "confidence": 1
+            },
+            {
+              "id": "authenticated",
+              "modelVerdict": "unverified",
+              "verdict": "unverified",
+              "reason": "insufficient-evidence",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "additional-domains",
+      "run": "https://github.com/aviarytech/tv/actions/runs/40112281189",
+      "results": [
+        {
+          "name": "bounded-volume-good",
+          "expected": [
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "bounded-volume",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "bounded-volume-bad",
+          "expected": [
+            "violated"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "bounded-volume",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "owner-authorization-good",
+          "expected": [
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "owner-authorization",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "owner-authorization-bad",
+          "expected": [
+            "violated"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "owner-authorization",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "newest-handler-good",
+          "expected": [
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "newest-handler",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "newest-handler-bad",
+          "expected": [
+            "violated"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "newest-handler",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "retryable-download-good",
+          "expected": [
+            "satisfied"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "retryable-download",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "name": "retryable-download-bad",
+          "expected": [
+            "violated"
+          ],
+          "headSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "retryable-download",
+              "modelVerdict": "violated",
+              "verdict": "violated",
+              "reason": "evidence-contradicts-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tv-evidence-replay",
+      "run": "https://github.com/aviarytech/tv/actions/runs/40112317752",
+      "results": [
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "signature-integrity",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.96,
+              "confidence": 0.94
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "compatibility",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.96,
+              "confidence": 0.94
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "rollback-blocking",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.95,
+              "confidence": 0.92
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "download-retry",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.97,
+              "confidence": 0.95
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "startup-safety",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.98,
+              "confidence": 0.97
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "bundle-pruning",
+              "modelVerdict": "satisfied",
+              "verdict": "unverified",
+              "reason": "below-threshold",
+              "probability": 0.87,
+              "confidence": 0.8
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "runtime-continuity",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.99,
+              "confidence": 0.98
+            }
+          ]
+        },
+        {
+          "pr": 23,
+          "originalRun": "40104613552",
+          "headSha": "e809f001f0a18c12de9218321aec9cf56ce0601a",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "provider-acceptance",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "sign-in-recovery",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.98,
+              "confidence": 0.97
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "browse-layout",
+              "modelVerdict": "satisfied",
+              "verdict": "unverified",
+              "reason": "below-threshold",
+              "probability": 0.87,
+              "confidence": 0.8
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "guide-home-states",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.97,
+              "confidence": 0.95
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": false,
+          "criteria": [
+            {
+              "id": "focus-and-error-states",
+              "modelVerdict": "satisfied",
+              "verdict": "unverified",
+              "reason": "below-threshold",
+              "probability": 0.75,
+              "confidence": 0.62
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "fixture-isolation",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.95,
+              "confidence": 0.92
+            }
+          ]
+        },
+        {
+          "pr": 24,
+          "originalRun": "40104342969",
+          "headSha": "b5ed85f0819bf5571bd5929b518e4c3601756b25",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "provider-acceptance",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "grid-index",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.98,
+              "confidence": 0.97
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "grid-wiring",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.99,
+              "confidence": 0.98
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "pending-moves",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.98,
+              "confidence": 0.97
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "back-policy",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.95,
+              "confidence": 0.92
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "back-dispatch",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.92,
+              "confidence": 0.88
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "category-rows",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 1,
+              "confidence": 1
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "category-pages",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.92,
+              "confidence": 0.88
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "signin",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.98,
+              "confidence": 0.97
+            }
+          ]
+        },
+        {
+          "pr": 25,
+          "originalRun": "40104849558",
+          "headSha": "f52c6cbdbbf33cada5bd881ec90d26d5d7246833",
+          "approved": true,
+          "criteria": [
+            {
+              "id": "provider-acceptance",
+              "modelVerdict": "satisfied",
+              "verdict": "satisfied",
+              "reason": "evidence-supports-criterion",
+              "probability": 0.99,
+              "confidence": 0.98
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

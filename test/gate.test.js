@@ -16,6 +16,11 @@ test('one Choice request evaluates each requirement and selects real evidence ID
     assert.deepEqual(Object.keys(body.questions), ['criterion_0', 'support_0_0', 'support_0_1', 'criterion_1', 'support_1_0', 'support_1_1']);
     assert.deepEqual(Object.keys(body.questions.support_0_0.criteria), ['supports', 'contradicts', 'irrelevant']);
     assert.match(body.questions.criterion_0.instructions.rules, /Tests can encode the same mistake/);
+    assert.equal(body.questions.criterion_1.instructions.target, 'state.task.criteria[1]');
+    assert.equal(body.questions.support_1_0.instructions.target, 'state.evidence[0]');
+    assert.equal(body.questions.support_1_0.instructions.requirement, 'state.task.criteria[1]');
+    // Per-item relevance must not inherit the whole-criterion completeness rule.
+    assert.notEqual(body.questions.support_0_0.instructions.rules, body.questions.criterion_0.instructions.rules);
     return Response.json(response());
   });
   assert.equal(calls, 1);
