@@ -72,7 +72,7 @@ export function requestBody(corpus, config) {
   return { model: config.model, state: corpus, questions };
 }
 async function boundedJson(response) {
-  if (!response.body) throw new GateError('invalid-response');
+  if (!response.body) throw new GateError('invalid-response', { issue: 'missing-response-body' });
   const reader = response.body.getReader();
   const chunks = [];
   let bytes = 0;
@@ -91,27 +91,38 @@ async function boundedJson(response) {
   } catch (error) {
     if (error instanceof GateError) throw error;
     if (error.name === 'AbortError' || error.name === 'TimeoutError') throw new GateError('api-timeout');
-    throw new GateError('invalid-response');
+    throw new GateError('invalid-response', { issue: 'invalid-json' });
   } finally {
     reader.releaseLock();
   }
 }
 
-function choice(answer, options) {
-  const p = answer?.probabilities;
-  if (answer?.type !== 'choice' || !options.includes(answer.choice) || !probability(answer.confidence)
-    || !p || Object.keys(p).length !== options.length || options.some(k => !probability(p[k]))
-    || Math.abs(options.reduce((sum, k) => sum + p[k], 0) - 1) > 0.001
-    || options.some(k => p[k] > p[answer.choice])) throw new GateError('invalid-response');
+function choice(answer, options, question) {
+  // Diagnostics use only local field names and finite numeric aggregates.
+  // Never copy provider strings, response bodies, instructions or evidence.
+  const invalid = (issue, extra = {}) => { throw new GateError('invalid-response', { question, issue, ...extra }); };
+  if (!answer || typeof answer !== 'object' || Array.isArray(answer)) invalid('missing-or-invalid-answer');
+  if (answer.type !== 'choice') invalid('answer-type');
+  if (!options.includes(answer.choice)) invalid('unknown-choice');
+  if (!probability(answer.confidence)) invalid('confidence-range');
+  const p = answer.probabilities;
+  if (!p || typeof p !== 'object' || Array.isArray(p) || Object.keys(p).length !== options.length
+    || options.some(k => !Object.hasOwn(p, k))) invalid('probability-keys');
+  if (options.some(k => !probability(p[k]))) invalid('probability-range');
+  const total = options.reduce((sum, k) => sum + p[k], 0);
+  if (Math.abs(total - 1) > 0.001) invalid('probability-total', { total });
+  if (options.some(k => p[k] > p[answer.choice])) invalid('choice-not-maximum', {
+    selectedProbability: p[answer.choice], maximumProbability: Math.max(...options.map(k => p[k])),
+  });
   return answer;
 }
 export function decisionFromResponse(response, config, corpus) {
-  if (typeof response?.model !== 'string' || !response.model.trim() || response.model.length > 200) throw new GateError('invalid-response');
+  if (typeof response?.model !== 'string' || !response.model.trim() || response.model.length > 200) throw new GateError('invalid-response', { issue: 'model-field' });
   const criteria = corpus.task.criteria.map((criterion, i) => {
-    const verdict = choice(response.answers?.[`criterion_${i}`], ['satisfied', 'violated', 'unverified']);
+    const verdict = choice(response.answers?.[`criterion_${i}`], ['satisfied', 'violated', 'unverified'], `criterion_${i}`);
     const enough = a => a.probabilities[a.choice] >= config.minProbability && a.confidence >= config.minConfidence;
     const assessments = corpus.evidence.map((item, j) => {
-      const answer = choice(response.answers?.[`support_${i}_${j}`], ['supports', 'contradicts', 'irrelevant']);
+      const answer = choice(response.answers?.[`support_${i}_${j}`], ['supports', 'contradicts', 'irrelevant'], `support_${i}_${j}`);
       return { id: item.id, kind: item.kind, source: item.source, relation: answer.choice,
         probability: answer.probabilities[answer.choice], confidence: answer.confidence, accepted: enough(answer) };
     });

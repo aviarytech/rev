@@ -121,3 +121,26 @@ test('invalid thresholds and deadlines fail closed', () => {
     assert.throws(() => configuration(raw), /invalid-configuration/);
   }
 });
+
+
+test('malformed answers expose bounded structural diagnostics without provider strings', () => {
+  for (const [mutate, issue] of [
+    [r => { delete r.answers.support_0_0; }, 'missing-or-invalid-answer'],
+    [r => { r.answers.support_0_0.type = 'PRIVATE_RESPONSE'; }, 'answer-type'],
+    [r => { r.answers.support_0_0.choice = 'PRIVATE_RESPONSE'; }, 'unknown-choice'],
+    [r => { r.answers.support_0_0.confidence = 'PRIVATE_RESPONSE'; }, 'confidence-range'],
+    [r => { r.answers.support_0_0.probabilities = { PRIVATE_RESPONSE: 1 }; }, 'probability-keys'],
+    [r => { r.answers.support_0_0.probabilities.supports = Infinity; }, 'probability-range'],
+    [r => { r.answers.support_0_0.probabilities.supports = 0.5; }, 'probability-total'],
+    [r => { r.answers.support_0_0.choice = 'irrelevant'; }, 'choice-not-maximum'],
+  ]) {
+    const data = response(); mutate(data);
+    assert.throws(() => decisionFromResponse(data, config, corpus()), error => {
+      assert.equal(error.code, 'invalid-response');
+      assert.equal(error.diagnostics.question, 'support_0_0');
+      assert.equal(error.diagnostics.issue, issue);
+      assert.doesNotMatch(JSON.stringify(error.diagnostics), /PRIVATE_RESPONSE|PRIVATE_EVIDENCE/);
+      return true;
+    });
+  }
+});
