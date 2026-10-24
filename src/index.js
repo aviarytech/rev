@@ -24,6 +24,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
   } catch (error) {
     const reason = error instanceof GateError ? error.code : 'internal-error';
     result = corpus ? blockedResult(corpus, reason) : { decision: 'deny', approved: false, reason, criteria: [] };
+    if (error instanceof GateError && error.diagnostics) result.diagnostics = error.diagnostics;
   }
   if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
   result.version = 3;
@@ -41,6 +42,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
       return `${name}<<${delimiter}\n${value}\n${delimiter}\n`;
     }).join(''));
   }
+  if (result.diagnostics) process.stdout.write(`REV diagnostics: ${JSON.stringify(result.diagnostics)}\n`);
   process.stdout.write(`REV: ${result.decision} (${result.reason})\n`);
   if (!result.approved) process.stdout.write(`::error::REV denied: ${result.reason}\n`);
   return result;
