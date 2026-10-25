@@ -63,6 +63,11 @@ test('coverage targets full request and each diff independently; reports omit ra
   const q = requestBody(c, config).questions;
   assert.equal(q.coverage_request.instructions.target, 'state.change.request');
   assert.deepEqual(q.coverage_file_0.instructions.criterionIds, ['anonymous', 'authenticated']);
+  assert.deepEqual(q.coverage_request.instructions.acceptanceCriteria, c.task.criteria);
+  assert.match(q.coverage_request.instructions.task, /Ignore diffs and evidence/);
+  assert.match(q.coverage_file_0.instructions.task, /Ignore obligations outside this diff/);
+  const partial = structuredClone(c); partial.change.files[0].criteria = ['anonymous'];
+  assert.deepEqual(requestBody(partial, config).questions.coverage_file_0.instructions.acceptanceCriteria, [c.task.criteria[0]]);
   const r = decisionFromResponse(coverageResponse(), config, c);
   const output = JSON.stringify(r) + summary(r);
   assert.ok(!output.includes(c.change.request.text));
