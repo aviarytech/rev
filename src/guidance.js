@@ -2,11 +2,21 @@
 export function guidance(result) {
   if (result.approved) return { kind: 'none', steps: [], criteria: [] };
   if (['coverage-unverified', 'unmapped-changes', 'missing-reviewed-contract', 'contract-mismatch'].includes(result.reason)) {
-    return { kind: 'review-required', steps: [
+    const criterionAdvice = result.reason === 'coverage-unverified'
+      ? guidance({ ...result, reason: 'criteria-unverified' }).criteria : [];
+    return { kind: 'review-required', coverage: (result.coverage?.assessments || [])
+      .filter(a => a.verdict !== 'covered').map(a => ({
+        target: a.target, criteria: a.criteria || [], modelVerdict: a.modelVerdict,
+        probability: a.probability, confidence: a.confidence,
+        reason: a.modelVerdict === 'covered' ? 'below-threshold' : a.verdict === 'missing' ? 'missing-coverage' : 'ambiguous-coverage',
+        step: a.modelVerdict === 'covered'
+          ? 'The model selected covered but did not meet the thresholds. No specific missing obligation was identified; compare this target and its criteria independently before changing code.'
+          : 'Inspect this target against its mapped criteria for an omitted or ambiguous obligation. The choice alone does not identify which obligation is missing.',
+      })), steps: [
       'Compare the original request and every changed file with the acceptance criteria. Add missing observable obligations and their implementation and behavioral evidence; unrelated passing regressions do not verify this PR.',
       'Have an independent reviewer approve the task, original request and required CI jobs. Supply the resulting contract digest through trusted workflow configuration. Do not compute and approve a new digest automatically from the PR.',
       'Preserve unresolved coverage findings. Do not switch to acceptance-only mode, drop changed files or narrow the request to obtain approval.',
-    ], criteria: [] };
+    ], criteria: criterionAdvice };
   }
   if (!['criteria-unverified', 'criteria-violated'].includes(result.reason)) {
     const step = result.reason === 'ci-not-successful'

@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/index.js && node --check src/gate.js && node --check src/corpus.js && node --check src/io.js && node --check src/report.js && node --check src/guidance.js && node --check src/errors.js && node --check src/policy.js && node --check eval/run.js && node --check src/coverage.js && node --check scripts/change.js && node --check eval/coverage-fixtures.js",
-    "eval": "node eval/run.js"
+    "check": "node --check src/index.js && node --check src/gate.js && node --check src/corpus.js && node --check src/io.js && node --check src/report.js && node --check src/guidance.js && node --check src/errors.js && node --check src/policy.js && node --check eval/run.js && node --check src/coverage.js && node --check scripts/change.js && node --check eval/coverage-fixtures.js && node --check src/focused.js && node --check eval/compare.js && node --check eval/real-pr-fixtures.js",
+    "eval": "node eval/run.js",
+    "eval:compare": "node eval/compare.js"
   }
 }

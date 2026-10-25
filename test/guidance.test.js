@@ -58,3 +58,17 @@ test('summary makes guidance visible and escapes criterion labels', () => {
   assert.doesNotMatch(rendered, /<script>|\n## pretend/);
   assert.doesNotMatch(summary({ approved: true, decision: 'approve', criteria: [] }), /### Next steps/);
 });
+test('coverage denials expose each unresolved target and retain concurrent evidence gaps', () => {
+  const result = { ...denied([]), reason:'coverage-unverified', coverage:{assessments:[
+    {target:'request',verdict:'unverified',modelVerdict:'covered',probability:.62,confidence:.43},
+    {target:'src/a.js',criteria:['form'],verdict:'missing',modelVerdict:'missing'},
+    {target:'src/b.js',verdict:'covered',modelVerdict:'covered'},
+  ]}};
+  const before = structuredClone(result);
+  const advice = guidance(result);
+  assert.deepEqual(result,before);
+  assert.deepEqual(advice.coverage.map(c=>c.reason),['below-threshold','missing-coverage']);
+  assert.match(advice.coverage[0].step,/No specific missing obligation/);
+  assert.deepEqual(advice.criteria[0].missingSupport,['implementation','behavior']);
+  assert.match(summary(result),/request: below-threshold/);
+});
