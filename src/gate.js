@@ -1,5 +1,6 @@
 import { INSTRUCTIONS, RELATION_INSTRUCTIONS } from './policy.js';
 import { GateError } from './errors.js';
+import { coverageQuestions } from './coverage.js';
 export { GateError } from './errors.js';
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 const probability = x => typeof x === 'number' && Number.isFinite(x) && x >= 0 && x <= 1;
@@ -18,11 +19,18 @@ export function configuration(raw = {}) {
 }
 export function blockedResult(corpus, reason) {
   return {
-    decision: 'deny', approved: false, reason, headSha: corpus.headSha,
+    decision: 'deny', approved: false, reason, headSha: corpus.headSha, scope: corpus.scope,
+    coverage: { verdict: corpus.change ? 'unverified' : 'not-assessed', reason,
+      unmappedFiles: corpus.change?.files.filter(f => !f.criteria.length).map(f => f.path) || [] },
     criteria: corpus.task.criteria.map(c => ({ ...c, verdict: 'unverified', reason, evidence: [] })),
   };
 }
 export function preflight(corpus) {
+  if (corpus.scope === 'pull-request' && !corpus.change) return blockedResult(corpus, 'missing-change');
+  if (corpus.change) {
+    if (corpus.change.files.some(f => !f.criteria.length)) return blockedResult(corpus, 'unmapped-changes');
+    if (corpus.change.requiredChecks.some(name => !Object.hasOwn(corpus.needs, name))) return blockedResult(corpus, 'missing-required-checks');
+  }
   let success = false;
   for (const step of Object.values(corpus.steps)) {
     if (!step || typeof step !== 'object' || Array.isArray(step)) throw new GateError('invalid-step');
@@ -43,7 +51,7 @@ export function preflight(corpus) {
   return null;
 }
 export function requestBody(corpus, config) {
-  const questions = {};
+  const questions = coverageQuestions(corpus);
   corpus.task.criteria.forEach((criterion, i) => {
     const instructions = { ...INSTRUCTIONS, criterion, target: `state.task.criteria[${i}]` };
     questions[`criterion_${i}`] = {
@@ -143,10 +151,27 @@ export function decisionFromResponse(response, config, corpus) {
       evidenceAssessments: assessments,
     };
   });
-  const approved = criteria.every(c => c.verdict === 'satisfied');
+  const coverageTargets = corpus.change ? [
+    { question: 'coverage_request', target: 'request' },
+    ...corpus.change.files.map((f, i) => ({ question: `coverage_file_${i}`, target: f.path, criteria: f.criteria })),
+  ] : [];
+  const assessments = coverageTargets.map(target => {
+    const a = choice(response.answers?.[target.question], ['covered', 'missing', 'unverified'], target.question);
+    const accepted = a.probabilities[a.choice] >= config.minProbability && a.confidence >= config.minConfidence;
+    return { ...target, verdict: accepted ? a.choice : 'unverified', modelVerdict: a.choice,
+      probability: a.probabilities[a.choice], confidence: a.confidence };
+  });
+  const coverage = { verdict: !corpus.change ? 'not-assessed'
+    : assessments.every(a => a.verdict === 'covered') ? 'covered'
+    : assessments.some(a => a.verdict === 'missing') ? 'missing' : 'unverified', assessments };
+  const criteriaVerified = criteria.every(c => c.verdict === 'satisfied');
+  const coverageVerified = !corpus.change || coverage.verdict === 'covered';
+  const approved = criteriaVerified && coverageVerified;
   return {
     decision: approved ? 'approve' : 'deny', approved,
-    reason: approved ? 'criteria-verified' : criteria.some(c => c.verdict === 'violated') ? 'criteria-violated' : 'criteria-unverified',
+    reason: !coverageVerified ? 'coverage-unverified' : approved ? 'criteria-verified' : criteria.some(c => c.verdict === 'violated') ? 'criteria-violated' : 'criteria-unverified',
+    scope: corpus.scope, coverage, criteriaVerified,
+    ...(corpus.change ? { baseSha: corpus.change.baseSha, contractSha256: corpus.change.contractSha256 } : {}),
     model: response.model, headSha: corpus.headSha, criteria,
   };
 }

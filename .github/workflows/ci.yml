@@ -24,6 +24,7 @@ jobs:
         continue-on-error: true
         uses: ./
         with:
+          scope: acceptance
           task-file: task.json
           evidence-file: evidence.json
           head-sha: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

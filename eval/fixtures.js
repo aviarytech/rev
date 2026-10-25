@@ -13,7 +13,7 @@ const bad = 'export function route(session) { return { status: 200, body: "expor
 const item = (id, kind, content) => ({ id, kind, source: `fixture/${id}`, content });
 export function makeCorpus(items, overrides = {}) {
   return buildCorpus(task, { version: 1, headSha: HEAD, items }, {
-    'head-sha': HEAD, needs: JSON.stringify({ ci: { result: 'success' } }), ...overrides,
+    scope: 'acceptance', 'head-sha': HEAD, needs: JSON.stringify({ ci: { result: 'success' } }), ...overrides,
   });
 }
 async function observe(code) {

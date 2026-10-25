@@ -40,6 +40,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: ./
         with:
+          scope: acceptance
           api-key: ${{ secrets.TYPESAFE_API_KEY }}
           task-file: examples/export/task.json
           evidence-file: evidence.json

@@ -1,3 +1,9 @@
+# Migrating to REV 0.3
+
+The default action scope is now `pull-request`; reports are version 4. Supply `change-file`, `base-sha` and an independently reviewed `contract-sha256` using the [PR coverage guide](pr-coverage.md). All requested behavior and changed files must be covered, and named required jobs must pass. Missing inputs deny.
+
+For intentionally narrow checks only, set `scope: acceptance` explicitly. Its approval covers supplied criteria, with `coverage=not-assessed`. Existing full-commit pins retain their behavior. No TV/SDK integration or branch rule is migrated automatically.
+
 # Migrating from REV 0.1
 
 Version 0.1 judged whether completed CI operations were consistent with a policy. Version 0.2 asks whether supplied implementation and behavioral evidence establishes a task's acceptance criteria. Green checks no longer suffice.
