@@ -14,6 +14,7 @@ export function summary(result) {
   const nextSteps = advice.steps.length ? [
     '### Next steps',
     ...advice.steps.map(step => `- ${escape(step)}`),
+    ...(advice.coverage || []).map(c => `- ${escape(c.target)}: ${escape(c.reason)}. ${escape(c.step)}`),
     ...advice.criteria.map(c => `#### ${escape(c.id)}
 
 ${c.steps.map(step => `- ${escape(step)}`).join('\n')}`),

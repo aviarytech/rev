@@ -75,3 +75,65 @@ The first 0.3 live run at evaluator `44a8872` evaluated 18 cases: zero false app
 The follow-up makes request coverage compare only request obligations with all criteria, and file coverage compare only that file's changed behavior with its mapped criteria. It embeds the corresponding criterion descriptions and explicitly separates coverage from correctness/evidence sufficiency. The positive fixture now states its exact two-input scope; this is a fixture clarification, not a demonstrated improvement on the original broader request. Thresholds are unchanged. Two bounded-volume coverage cases were added before inspecting the follow-up's live results, bringing the suite to 20. No repeated unchanged-input retries are used to obtain approval.
 
 The scoped candidate `8168624` then passed [all 20 cases](https://github.com/aviarytech/tv/actions/runs/40240205167): zero false approvals, false denials, mismatches or API errors. Each case ran once. Full reports are preserved in `eval/results/2026-10-25-coverage-scoped.json`. These are small development regressions, not a representative real-world reliability benchmark.
+
+## Focused real-PR experiment
+
+`npm run eval:compare -- /private/path/to/tv-input /private/path/to/sdk-input`
+loads the original `task.json`, `change.json` and `evidence.json` artifacts. It
+compares production with an experimental per-question evaluator. Both use the
+same model, thresholds, evidence, aggregation rules and 60-second total deadline.
+The focused candidate has at most four requests in flight, no retries, and never
+selects away evidence: every criterion sees every item, including contradictions.
+It is not enabled by the production action.
+
+Before the first comparison, the TV `29ac0db` and SDK `a1a7ed58` rollout cases were
+reviewed separately from their model scores. Their requests map to collection,
+trusted evaluation, retained checks, operator configuration and upstream
+validation criteria; file changes implement those obligations. Their **coverage**
+label is covered. Overall approval is deliberately unlabeled: the recorded
+upstream provenance/live-run summary is an assertion about an external event,
+and is not fully established by the supplied implementation and tests. In SDK,
+the validator also requires implementation plus test/behavior support, whereas
+that criterion's strongest accepted source was only a report. These are not
+independently certified merge-ready positive cases.
+
+Each real case gets five fixed negative variants: an additional unmet endpoint
+request, an endpoint implementation mapped only to operator documentation, an
+unmapped file, failed CI and absent evidence. The latter three must deny before
+inference. The original 20 synthetic cases remain, including known-good approval
+cases so an always-deny evaluator cannot pass. Mutations are offline experiments;
+the fixture digest never sets a trusted repository variable. Keep original input
+artifacts and comparison reports in their owning repository, particularly for
+private projects. Do not publish private source in this repository.
+
+`rev-comparison-report.json` records each strategy's coverage, criterion scores,
+label comparisons, errors and elapsed time. Partial results are written after
+each case. Missing coverage labels and incorrect denials are failures, not
+successful detections. Low scores are not measured correctness probabilities.
+This is a development comparison, not a held-out certification. Promote a
+candidate only after reviewing its failures and costs; never merge downstream
+PRs using this replay as a substitute for fresh checks.
+
+### First paired result: do not promote focused evaluation
+
+Candidate `8844c2d` completed 32 cases per strategy. Baseline had zero API errors
+and four coverage-label mismatches. Focused had two invalid-response errors and
+four coverage-label mismatches among its completed cases, including a synthetic
+coverage regression. Both reported zero false approvals and false denials on
+approval-labeled cases; neither real original is approval-labeled. Baseline
+returned unverified coverage for both real originals. Focused errored on one and
+returned unverified on the other. It therefore did not resolve the rollout.
+
+Aggregate results and the private full report's SHA-256 are preserved in
+`eval/results/2026-10-25-real-pr-comparison.json`. Errors are separate from
+mismatches, not successes. The original runner omitted structural error details;
+future runs retain the existing safe GateError diagnostics, but the exact fields
+responsible for these two errors cannot be reconstructed. No unchanged-input
+retry was used to replace this result.
+
+The focused implementation remains experimental and is **not promoted**. The
+production change is limited to advisory diagnostics: identify unresolved targets,
+distinguish below-threshold covered choices from missing-coverage choices, and
+retain concurrent criterion evidence gaps. These diagnostics do not invent a
+specific unmet obligation where the model supplied none. The comparison does not
+justify merging either downstream rollout or weakening approval thresholds.

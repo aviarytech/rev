@@ -181,18 +181,22 @@ export async function evaluate(corpus, config, apiKey, fetchImpl = fetch) {
   if (!apiKey?.trim()) throw new GateError('missing-api-key');
   const signal = AbortSignal.timeout(config.timeoutMs);
   try {
-    const response = await fetchImpl(ENDPOINT, {
-      method: 'POST', headers: { Authorization: `Bearer ${apiKey.trim()}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody(corpus, config)), redirect: 'error', signal,
-    });
-    if (!response.ok) {
-      await response.body?.cancel();
-      throw new GateError(`api-http-${response.status}`);
-    }
-    return decisionFromResponse(await boundedJson(response), config, corpus);
+    return decisionFromResponse(await sendRequest(requestBody(corpus, config), apiKey, fetchImpl, signal), config, corpus);
   } catch (error) {
     if (signal.aborted) throw new GateError('api-timeout');
     if (error instanceof GateError) throw error;
     throw new GateError('api-unavailable');
   }
+}
+
+export async function sendRequest(body, apiKey, fetchImpl, signal) {
+  const response = await fetchImpl(ENDPOINT, {
+    method: 'POST', headers: { Authorization: `Bearer ${apiKey.trim()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body), redirect: 'error', signal,
+  });
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new GateError(`api-http-${response.status}`);
+  }
+  return boundedJson(response);
 }

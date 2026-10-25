@@ -1,0 +1,50 @@
+{
+  "candidate": "8844c2d50a64c930b080c5b661d38096da94f38d",
+  "reportSha256": "855017ab172ea1e74e0e25b4c7957cde702aa3adc879ddc491aa7fad7df7b12e",
+  "casesPerStrategy": 32,
+  "syntheticCases": 20,
+  "realOriginalsCoverageOnly": 2,
+  "realNegativeVariants": 10,
+  "config": {
+    "model": "jev-1.14.0",
+    "minProbability": 0.9,
+    "minConfidence": 0.8,
+    "timeoutMs": 60000
+  },
+  "decision": "Do not promote focused evaluation; retain production strategy and thresholds.",
+  "strategies": {
+    "baseline": {
+      "error": 0,
+      "falseApproval": 0,
+      "falseDenial": 0,
+      "coverageMismatch": 4,
+      "reasonMismatch": 0,
+      "criterionMismatch": 0,
+      "totalDurationMs": 3754,
+      "realOriginalCoverage": [
+        "unverified",
+        "unverified"
+      ]
+    },
+    "focused": {
+      "error": 2,
+      "falseApproval": 0,
+      "falseDenial": 0,
+      "coverageMismatch": 4,
+      "reasonMismatch": 0,
+      "criterionMismatch": 0,
+      "totalDurationMs": 8203,
+      "realOriginalCoverage": [
+        "invalid-response",
+        "unverified"
+      ]
+    }
+  },
+  "limitations": [
+    "Errors are counted separately, never as correct denials or label matches.",
+    "Real originals are labeled only for coverage, so zero false denials does not certify their merge readiness.",
+    "Single paired development experiment; not a held-out reliability estimate.",
+    "Full report and immutable input snapshots remain in the private source repository.",
+    "Initial runner retained error codes but omitted structural diagnostics; exact malformed response fields cannot be recovered."
+  ]
+}
