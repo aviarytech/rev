@@ -89,7 +89,7 @@ npm test         # Mocked transport and deterministic behavior; no API key neede
 npm run eval    # Live Jev judgments; requires TYPESAFE_API_KEY in the environment.
 ```
 
-Local unit tests do not measure model accuracy. The live suite reports false approvals, false denials, criterion mismatches and API errors. These six synthetic cases are a starting point, not a benchmark of real-world reliability. The previous acceptance policy passed 14 recorded synthetic cases. The new coverage policy has not yet been live-validated; those earlier results do not measure it.
+Local unit tests do not measure model accuracy. The live suite reports false approvals, false denials, criterion mismatches and API errors. These six synthetic cases are a starting point, not a benchmark of real-world reliability. The scoped acceptance-and-coverage policy passed 20 recorded synthetic development cases. The first coverage run and its failures are also preserved; see the evaluation methodology for limits.
 
 ## Small interface
 
