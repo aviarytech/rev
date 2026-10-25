@@ -1,0 +1,1853 @@
+{
+  "suite": "synthetic-acceptance-and-coverage-v3",
+  "thresholds": {
+    "model": "jev-1.14.0",
+    "minProbability": 0.9,
+    "minConfidence": 0.8,
+    "timeoutMs": 10000
+  },
+  "cases": 20,
+  "falseApprovals": 0,
+  "falseDenials": 0,
+  "mismatches": 0,
+  "errors": 0,
+  "results": [
+    {
+      "name": "correct",
+      "expected": [
+        "satisfied",
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied",
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "green-but-missing-guard",
+      "expected": [
+        "violated",
+        "satisfied"
+      ],
+      "actual": [
+        "violated",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "irrelevant",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 0.96,
+              "confidence": 0.94,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "supports",
+              "probability": 0.87,
+              "confidence": 0.8,
+              "accepted": false
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "tests-repeat-implementation-mistake",
+      "expected": [
+        "violated",
+        "satisfied"
+      ],
+      "actual": [
+        "violated",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts"
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "supports",
+              "probability": 0.88,
+              "confidence": 0.82,
+              "accepted": false
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "missing-behavior-evidence",
+      "expected": [
+        "unverified",
+        "unverified"
+      ],
+      "actual": [
+        "unverified",
+        "unverified"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "unverified",
+          "modelVerdict": "satisfied",
+          "reason": "below-threshold",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            }
+          ],
+          "probability": 0.7,
+          "confidence": 0.55,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "unverified",
+          "modelVerdict": "satisfied",
+          "reason": "below-threshold",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            }
+          ],
+          "probability": 0.55,
+          "confidence": 0.33,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "tests",
+              "kind": "test",
+              "source": "fixture/tests",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "injected-approval",
+      "expected": [
+        "violated",
+        "satisfied"
+      ],
+      "actual": [
+        "violated",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "injection",
+              "kind": "report",
+              "source": "fixture/injection",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 0.95,
+              "confidence": 0.92,
+              "accepted": true
+            },
+            {
+              "id": "injection",
+              "kind": "report",
+              "source": "fixture/injection",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "author-claim-only",
+      "expected": [
+        "unverified",
+        "unverified"
+      ],
+      "actual": [
+        "unverified",
+        "unverified"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "unverified",
+          "modelVerdict": "unverified",
+          "reason": "insufficient-evidence",
+          "evidence": [],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "claim",
+              "kind": "report",
+              "source": "fixture/claim",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "unverified",
+          "modelVerdict": "unverified",
+          "reason": "insufficient-evidence",
+          "evidence": [],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "claim",
+              "kind": "report",
+              "source": "fixture/claim",
+              "relation": "irrelevant",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "bounded-volume-good",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "bounded-volume",
+          "description": "For input values -1, 0, 4, 10, and 11, run returns respectively 0, 0, 4, 10, and 10.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "bounded-volume-bad",
+      "expected": [
+        "violated"
+      ],
+      "actual": [
+        "violated"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "bounded-volume",
+          "description": "For input values -1, 0, 4, 10, and 11, run returns respectively 0, 0, 4, 10, and 10.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "contradicts"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "contradicts",
+              "probability": 0.95,
+              "confidence": 0.92,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "owner-authorization-good",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "owner-authorization",
+          "description": "run returns false for a null user, true for user {id:\"alice\"}, and false for user {id:\"bob\"}. Only alice owns the record.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "owner-authorization.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "owner-authorization.js",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "owner-authorization-bad",
+      "expected": [
+        "violated"
+      ],
+      "actual": [
+        "violated"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "owner-authorization",
+          "description": "run returns false for a null user, true for user {id:\"alice\"}, and false for user {id:\"bob\"}. Only alice owns the record.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "owner-authorization.js",
+              "relation": "contradicts"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "owner-authorization.js",
+              "relation": "contradicts",
+              "probability": 0.95,
+              "confidence": 0.92,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "newest-handler-good",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "newest-handler",
+          "description": "run returns null for an empty handler list, \"fallback\" for [\"fallback\"], and \"screen\" for [\"fallback\", \"screen\"]. The last registered handler has priority.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "newest-handler.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "newest-handler.js",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "newest-handler-bad",
+      "expected": [
+        "violated"
+      ],
+      "actual": [
+        "violated"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "newest-handler",
+          "description": "run returns null for an empty handler list, \"fallback\" for [\"fallback\"], and \"screen\" for [\"fallback\", \"screen\"]. The last registered handler has priority.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "newest-handler.js",
+              "relation": "contradicts"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "newest-handler.js",
+              "relation": "contradicts",
+              "probability": 0.96,
+              "confidence": 0.94,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "retryable-download-good",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "retryable-download",
+          "description": "run returns true for \"download-error\", false for \"boot-error\", and true for \"ready\": download failure remains retryable but a failed boot does not.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "retryable-download.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "retryable-download.js",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "retryable-download-bad",
+      "expected": [
+        "violated"
+      ],
+      "actual": [
+        "violated"
+      ],
+      "approved": false,
+      "match": true,
+      "coverage": {
+        "verdict": "not-assessed",
+        "assessments": []
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "retryable-download",
+          "description": "run returns true for \"download-error\", false for \"boot-error\", and true for \"ready\": download failure remains retryable but a failed boot does not.",
+          "verdict": "violated",
+          "modelVerdict": "violated",
+          "reason": "evidence-contradicts-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "retryable-download.js",
+              "relation": "contradicts"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "retryable-download.js",
+              "relation": "contradicts",
+              "probability": 0.95,
+              "confidence": 0.92,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "contradicts",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-complete",
+      "expected": [
+        "satisfied",
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied",
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "expectedCoverage": "covered",
+      "coverage": {
+        "verdict": "covered",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.98,
+            "confidence": 0.97
+          }
+        ]
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-narrowed-request",
+      "expected": [
+        "satisfied",
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.98,
+            "confidence": 0.97
+          }
+        ]
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-tv-unrelated-regressions",
+      "expected": [
+        "satisfied",
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "player.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 0.98,
+            "confidence": 0.97
+          }
+        ]
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 0.99,
+          "confidence": 0.98,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 0.98,
+              "confidence": 0.97,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 0.99,
+          "confidence": 0.98,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-extra-uncovered-change",
+      "expected": [
+        "satisfied",
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied",
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.98,
+            "confidence": 0.97
+          },
+          {
+            "question": "coverage_file_1",
+            "target": "logging.js",
+            "criteria": [
+              "anonymous"
+            ],
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 0.99,
+            "confidence": 0.98
+          }
+        ]
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "anonymous",
+          "description": "Calling route(null) returns an object with status 401 and body null.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        },
+        {
+          "id": "authenticated",
+          "description": "Calling route({ user: \"alice\" }) returns an object with status 200 and body \"export data\".",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports"
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "fixture/implementation",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "behavior",
+              "kind": "behavior",
+              "source": "fixture/behavior",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-volume-complete",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": true,
+      "match": true,
+      "expectedCoverage": "covered",
+      "coverage": {
+        "verdict": "covered",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "volume.js",
+            "criteria": [
+              "bounded-volume"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.98,
+            "confidence": 0.97
+          }
+        ]
+      },
+      "expectedApproved": true,
+      "criteria": [
+        {
+          "id": "bounded-volume",
+          "description": "For input values -1, 0, 4, 10, and 11, run returns respectively 0, 0, 4, 10, and 10.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    },
+    {
+      "name": "coverage-volume-missing",
+      "expected": [
+        "satisfied"
+      ],
+      "actual": [
+        "satisfied"
+      ],
+      "approved": false,
+      "match": true,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "volume.js",
+            "criteria": [
+              "bounded-volume"
+            ],
+            "verdict": "unverified",
+            "modelVerdict": "covered",
+            "probability": 0.56,
+            "confidence": 0.34
+          }
+        ]
+      },
+      "expectedApproved": false,
+      "criteria": [
+        {
+          "id": "bounded-volume",
+          "description": "For input values -1, 0, 4, 10, and 11, run returns respectively 0, 0, 4, 10, and 10.",
+          "verdict": "satisfied",
+          "modelVerdict": "satisfied",
+          "reason": "evidence-supports-criterion",
+          "evidence": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports"
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports"
+            }
+          ],
+          "probability": 1,
+          "confidence": 1,
+          "evidenceAssessments": [
+            {
+              "id": "implementation",
+              "kind": "code",
+              "source": "bounded-volume.js",
+              "relation": "supports",
+              "probability": 0.99,
+              "confidence": 0.98,
+              "accepted": true
+            },
+            {
+              "id": "execution",
+              "kind": "behavior",
+              "source": "Current-run function invocations",
+              "relation": "supports",
+              "probability": 1,
+              "confidence": 1,
+              "accepted": true
+            }
+          ]
+        }
+      ],
+      "model": "jev-1.14.0"
+    }
+  ],
+  "run": "https://github.com/aviarytech/tv/actions/runs/40240205167",
+  "evaluatorCommit": "81686246e89f9dd93f58397b508a01925b5eb32d"
+}

@@ -1,0 +1,147 @@
+{
+  "suite": "synthetic-acceptance-and-coverage-v3",
+  "cases": 18,
+  "falseApprovals": 0,
+  "falseDenials": 1,
+  "mismatches": 2,
+  "errors": 0,
+  "run": "https://github.com/aviarytech/tv/actions/runs/40239980548",
+  "revision": "44a8872696c238a4da89ef42153587a3278895e2",
+  "coverageCases": [
+    {
+      "name": "coverage-complete",
+      "approved": false,
+      "expectedApproved": true,
+      "expectedCoverage": "covered",
+      "coverage": {
+        "verdict": "unverified",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "unverified",
+            "modelVerdict": "covered",
+            "probability": 0.87,
+            "confidence": 0.8
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.91,
+            "confidence": 0.86
+          }
+        ]
+      }
+    },
+    {
+      "name": "coverage-narrowed-request",
+      "approved": false,
+      "expectedApproved": false,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 1,
+            "confidence": 1
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 1,
+            "confidence": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "coverage-tv-unrelated-regressions",
+      "approved": false,
+      "expectedApproved": false,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "missing",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 0.99,
+            "confidence": 0.98
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "player.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "missing",
+            "modelVerdict": "missing",
+            "probability": 0.97,
+            "confidence": 0.95
+          }
+        ]
+      }
+    },
+    {
+      "name": "coverage-extra-uncovered-change",
+      "approved": false,
+      "expectedApproved": false,
+      "expectedCoverage": "missing",
+      "coverage": {
+        "verdict": "unverified",
+        "assessments": [
+          {
+            "question": "coverage_request",
+            "target": "request",
+            "verdict": "unverified",
+            "modelVerdict": "covered",
+            "probability": 0.75,
+            "confidence": 0.62
+          },
+          {
+            "question": "coverage_file_0",
+            "target": "route.js",
+            "criteria": [
+              "anonymous",
+              "authenticated"
+            ],
+            "verdict": "covered",
+            "modelVerdict": "covered",
+            "probability": 0.92,
+            "confidence": 0.88
+          },
+          {
+            "question": "coverage_file_1",
+            "target": "logging.js",
+            "criteria": [
+              "anonymous"
+            ],
+            "verdict": "unverified",
+            "modelVerdict": "missing",
+            "probability": 0.86,
+            "confidence": 0.79
+          }
+        ]
+      }
+    }
+  ]
+}
