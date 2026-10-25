@@ -2,6 +2,12 @@
 
 That is an open question. This repository separates deterministic implementation tests from live evaluation of Jev's judgments. Neither a working API call nor passing mocked tests demonstrates accuracy.
 
+## New coverage cases (0.3)
+
+Four additional prospective cases check complete coverage, a narrowed original request, TV-style unrelated regression criteria and an extra unaccounted-for changed file. `npm run eval` evaluates all 18 cases and includes coverage verdicts and final approval in mismatch accounting. The four coverage cases have not yet been live-validated. Earlier live results below apply to the acceptance policy, not the new coverage policy.
+
+Deterministic regression tests verify that all-satisfied criteria cannot override missing or uncertain coverage, and that absent jobs, changed contracts and unmapped files deny before inference. These tests do not measure semantic model accuracy.
+
 ## Current synthetic suite
 
 The first six cases exercise an export function: `route(null)` must return status 401/body null; `route({user: 'alice'})` must return status 200/body `export data`. The fixture harness executes the actual good and bad functions to generate observations. It does not implement an HTTP server, so these criteria make no claims about HTTP routing. Every case supplies a successful CI result.

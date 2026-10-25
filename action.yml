@@ -1,10 +1,22 @@
 name: REV
-description: Evaluate task acceptance criteria against commit-bound implementation evidence.
+description: Check request and change coverage before evaluating commit-bound acceptance evidence.
 author: REV
 branding:
   icon: check-circle
   color: purple
 inputs:
+  scope:
+    description: pull-request requires reviewed request and full change coverage. acceptance explicitly checks only supplied criteria.
+    default: pull-request
+  change-file:
+    description: Complete Git change manifest with original request, required CI jobs and per-file criterion mappings.
+    required: false
+  base-sha:
+    description: Expected PR base SHA. Required in pull-request scope.
+    required: false
+  contract-sha256:
+    description: Independently reviewed task/request/required-checks digest, supplied from trusted configuration. Required in pull-request scope.
+    required: false
   api-key:
     description: TypeSafe API key. Alternatively set TYPESAFE_API_KEY.
     required: false
@@ -42,7 +54,13 @@ outputs:
   decision:
     description: approve or deny. Errors deny.
   approved:
-    description: String true only when all criteria are verified and supplied CI results pass.
+    description: String true when configured scope passes. Never a claim of overall merge readiness.
+  scope:
+    description: pull-request or acceptance.
+  coverage:
+    description: covered, missing, unverified or not-assessed.
+  merge-readiness:
+    description: Always not-established. Branch rules, independent review and uncovered runtime risks remain external.
   reason:
     description: Stable decision or error code.
   head-sha:

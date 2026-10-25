@@ -44,7 +44,7 @@ export async function challengeFixtures() {
       ];
       const corpus = buildCorpus({ version: 1, task: 'Check the specified behavior of the supplied run function.',
         criteria: [{ id: pair.name, description: pair.requirement }] }, { version: 1, headSha: HEAD, items },
-      { 'head-sha': HEAD, needs: JSON.stringify({ ci: { result: 'success' } }) });
+      { scope: 'acceptance', 'head-sha': HEAD, needs: JSON.stringify({ ci: { result: 'success' } }) });
       cases.push({ name: `${pair.name}-${variant}`, expected: [variant === 'good' ? 'satisfied' : 'violated'], corpus });
     }
   }

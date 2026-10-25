@@ -1,6 +1,13 @@
 // Advisory, deterministic follow-up only: never changes a verdict or threshold.
 export function guidance(result) {
   if (result.approved) return { kind: 'none', steps: [], criteria: [] };
+  if (['coverage-unverified', 'unmapped-changes', 'missing-reviewed-contract', 'contract-mismatch'].includes(result.reason)) {
+    return { kind: 'review-required', steps: [
+      'Compare the original request and every changed file with the acceptance criteria. Add missing observable obligations and their implementation and behavioral evidence; unrelated passing regressions do not verify this PR.',
+      'Have an independent reviewer approve the task, original request and required CI jobs. Supply the resulting contract digest through trusted workflow configuration. Do not compute and approve a new digest automatically from the PR.',
+      'Preserve unresolved coverage findings. Do not switch to acceptance-only mode, drop changed files or narrow the request to obtain approval.',
+    ], criteria: [] };
+  }
   if (!['criteria-unverified', 'criteria-violated'].includes(result.reason)) {
     const step = result.reason === 'ci-not-successful'
       ? 'Inspect the failed, cancelled or skipped CI operation, repair it, and regenerate evidence for the current head.'

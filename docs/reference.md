@@ -1,6 +1,6 @@
 # Reference
 
-REV 0.2 replaces the CI-consistency prototype with acceptance-criteria evaluation. This is a breaking input and output change.
+REV 0.3 defaults to PR coverage evaluation before acceptance verification. See [PR coverage](pr-coverage.md) for the reviewed contract, complete change manifest, migration and trust boundaries. The criterion/evidence formats below remain version 1.
 
 ## Task
 
@@ -37,7 +37,7 @@ Use concrete externally observable requirements. "Looks good" is not a useful cr
 
 The SHA must be the exact 40-character lowercase PR head SHA and match the `head-sha` action input. This rejects a mismatched label; it does not authenticate who produced evidence or prove that file contents belong to that commit. Use trusted CI collectors and artifacts from the same run. Do not relabel old evidence with a new SHA.
 
-Up to 40 items, subject to `criteria × (items + 1) ≤ 100` to bound the number of model questions, with the same ID rules as criteria. Kinds: `diff`, `code`, `test`, `behavior`, `report`. `source` is a nonempty label up to 500 characters, preferably a path and line or a report identifier. It is not fetched or resolved by REV. `content` must contain the actual evidence, not a URL the model cannot access. Empty item lists deny.
+Up to 40 items, subject to `criteria × (items + 1) + coverage questions ≤ 100` to bound the number of model questions, with the same ID rules as criteria. Kinds: `diff`, `code`, `test`, `behavior`, `report`. `source` is a nonempty label up to 500 characters, preferably a path and line or a report identifier. It is not fetched or resolved by REV. `content` must contain the actual evidence, not a URL the model cannot access. Empty item lists deny.
 
 The evaluator requires code/diff evidence and concrete test/behavior evidence exercising each criterion. It checks for wrong expectations and contradictions; no guarantee of detecting them is established. Each item is independently judged as supporting, contradicting, or irrelevant to each criterion. Multiple sources can support a criterion together. No generated rationale or source quotation is returned. The report combines the criterion, verdict, reason code, and references so a reviewer can inspect the original evidence.
 
@@ -59,6 +59,10 @@ See [the runnable sources example](../examples/export/sources.json). Capture com
 
 | Input | Default | Contract |
 | --- | --- | --- |
+| `scope` | `pull-request` | Require PR coverage; explicit `acceptance` checks supplied criteria only. |
+| `change-file` | required in PR scope | Complete change manifest; see [PR coverage](pr-coverage.md). |
+| `base-sha` | required in PR scope | Expected PR base SHA. |
+| `contract-sha256` | required in PR scope | Independently reviewed task/request/required-jobs digest. |
 | `task-file` | required | Task manifest path. |
 | `evidence-file` | required | Evidence manifest path. |
 | `head-sha` | required | Expected PR head SHA, explicitly supplied. |
@@ -71,17 +75,19 @@ See [the runnable sources example](../examples/export/sources.json). Capture com
 | `min-confidence` | `0.8` | Choice confidence threshold, 0–1. |
 | `timeout-ms` | `10000` | Request plus response deadline, 100–60000 ms. |
 
-Failures and cancellations, including step failures masked by `continue-on-error`, deny before inference. All supplied dependency jobs must succeed; skipped dependencies deny. At least one successful step or dependency must be supplied. Skipped individual steps do not count as proof; include every applicable CI job in `needs`. REV cannot infer omitted jobs or distinguish an ordinary successful setup step from your complete test suite.
+Failures and cancellations, including step failures masked by `continue-on-error`, deny before inference. All supplied dependency jobs must succeed; skipped dependencies deny. At least one successful step or dependency must be supplied. Skipped individual steps do not count as proof; include every applicable CI job in `needs`. PR scope also requires every job named in the reviewed contract to be present in `needs`. REV cannot infer jobs omitted from that contract or distinguish an ordinary successful setup step from your complete test suite.
 
 ## Model and aggregation
 
 One POST to TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one), with no retries. Each criterion has a typed Choice verdict question (`satisfied`, `violated`, `unverified`) and a separate question for every evidence item (`supports`, `contradicts`, `irrelevant`). Evidence items do not compete for a single citation slot.
 
-Each question sees the task and full supplied corpus, but explicitly targets one criterion. Source-relation questions target one item and use their own relevance policy; they do not inherit the rule that the entire criterion needs both implementation and behavioral evidence. The whole-criterion question still requires that complete evidence. Returned distributions and choices are validated. A satisfied verdict requires its own probability/confidence thresholds, accepted supporting implementation and behavioral references, and no accepted contradicting reference. A violated verdict requires its thresholds and at least one accepted contradiction. Each relationship must independently meet the same thresholds to be accepted. Otherwise the reported criterion is `unverified`. Approval is a deterministic conjunction of all satisfied verdicts after the CI preflight.
+Each question sees the task and full supplied corpus, but explicitly targets one criterion. Source-relation questions target one item and use their own relevance policy; they do not inherit the rule that the entire criterion needs both implementation and behavioral evidence. The whole-criterion question still requires that complete evidence. Returned distributions and choices are validated. A satisfied verdict requires its own probability/confidence thresholds, accepted supporting implementation and behavioral references, and no accepted contradicting reference. A violated verdict requires its thresholds and at least one accepted contradiction. Each relationship must independently meet the same thresholds to be accepted. Otherwise the reported criterion is `unverified`. Approval is a deterministic conjunction of all satisfied verdicts after the CI preflight, plus covered request/file judgments in PR scope.
 
 The report preserves raw verdicts and all relationship assessments for diagnosis. A relation's probability measures support/contradiction/irrelevance, not which of several equally useful sources is "best." Conflicting model answers prevent satisfaction. Selecting real items still does not prove that their contents support the claim; the live suite tests those judgments. Confidence and probability are not independently calibrated correctness guarantees.
 
 ## Outputs
+
+Version 4 adds `scope`, `coverage` and `merge-readiness` action outputs. Reports prominently distinguish `coverage: not-assessed` in acceptance scope. Overall merge readiness is always `not-established`; a green model check is not authorization to merge. See [coverage report fields and errors](pr-coverage.md#manifest-and-verdicts).
 
 | Output | Meaning |
 | --- | --- |
@@ -94,7 +100,7 @@ The report preserves raw verdicts and all relationship assessments for diagnosis
 | `model` | Returned model ID, empty before successful inference. |
 | `duration-ms` | Execution duration before report publication. |
 
-The report has `version: 3`, the decision fields, `headSha`, and `criteria`. Action reports also record the configured probability/confidence `thresholds` when configuration validation succeeded. The GitHub summary shows criterion scores, thresholds, model and duration, with all per-source scores under “Requirements and evidence scores.” Each criterion includes `id`, `description`, `verdict`, `reason`, and an `evidence` array of accepted references (`{id, kind, source, relation}`). An empty array means no relationship met the thresholds. Model-evaluated criteria also include `modelVerdict`, its selected-choice `probability` and `confidence`, and `evidenceAssessments` with every relationship, its scores, and `accepted`. A raw verdict can be downgraded to `unverified` by the deterministic aggregator.
+The report has `version: 4`, the decision fields, `headSha`, and `criteria`. Action reports also record the configured probability/confidence `thresholds` when configuration validation succeeded. The GitHub summary shows criterion scores, thresholds, model and duration, with all per-source scores under “Requirements and evidence scores.” Each criterion includes `id`, `description`, `verdict`, `reason`, and an `evidence` array of accepted references (`{id, kind, source, relation}`). An empty array means no relationship met the thresholds. Model-evaluated criteria also include `modelVerdict`, its selected-choice `probability` and `confidence`, and `evidenceAssessments` with every relationship, its scores, and `accepted`. A raw verdict can be downgraded to `unverified` by the deterministic aggregator.
 
 Action reports also include additive `guidance`: `kind` (`none`, `review-required`, or `evaluation-blocked`), shared `steps`, and unresolved `criteria` entries with `id`, `missingSupport` (`implementation` and/or `behavior`), and criterion-specific `steps`. Missing support refers to accepted supporting relationships, not proven code defects. Guidance is deterministic and advisory; it does not change decisions, thresholds, or model requests. It appears under “Next steps” in denied job summaries. See [the agent review workflow](agents.md#review-before-escalating).
 

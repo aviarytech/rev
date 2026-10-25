@@ -1,5 +1,7 @@
 # Integrating the final REV check
 
+For 0.3, follow the [PR coverage guide](pr-coverage.md). The default scope requires a complete change manifest and independently reviewed task/request/required-checks digest. The evidence flow below describes acceptance evidence within that larger gate.
+
 Start in observation mode: publish the REV job but do not make it a required branch check yet. A denied or errored evaluation still fails its job so the visible result remains honest. Observe false approvals and false denials before enforcing it. Do not use `continue-on-error` to create a green acceptance check.
 
 ## Evidence flow

@@ -1,6 +1,6 @@
 # Agent contract
 
-REV evaluates whether supplied evidence establishes a specified task's acceptance criteria. It does not authorize a merge or evaluate requirements that were omitted.
+REV checks request/change coverage in its default PR scope and evaluates whether supplied evidence establishes the acceptance criteria. It does not authorize a merge or evaluate requirements that were omitted.
 
 ## Prepare a task
 
@@ -15,6 +15,7 @@ Use `decision`, `approved`, `head-sha`, `verified`, `total`, and the JSON report
 An approval requires all of the following:
 
 - `decision=approve` and `approved=true`.
+- `scope=pull-request` and `coverage=covered`, with the current base and independently approved contract digest. Acceptance-only approval is insufficient for a PR coverage gate.
 - Successful completion of the action and its containing `REV` job.
 - The report's `headSha` matches the current PR head, every criterion is satisfied, and `verified=total` with at least one criterion.
 - All other applicable checks, reviews, and branch rules are satisfied for the same head.
@@ -22,6 +23,8 @@ An approval requires all of the following:
 Missing reports, missing outputs, skipped evaluation, uncertainty, stale evidence, and errors block approval. A successful earlier check or an approval on an old commit does not apply to new work.
 
 ## Respond to denial
+
+Coverage failures require comparing the original request and complete diff with the criteria. Add missing requirements through independent review and gather their behavioral evidence. Do not remap unrelated criteria, drop files, automatically approve a new contract digest, or select acceptance scope to obtain green.
 
 - `criteria-violated`: inspect the cited contradiction, repair the implementation, and produce fresh evidence.
 - `criteria-unverified`: inspect each unresolved criterion. Add relevant code and independent behavioral evidence, or clarify an ambiguous requirement through review.

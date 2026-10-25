@@ -7,6 +7,7 @@ import { readJson } from './io.js';
 import { guidance } from './guidance.js';
 import { summary } from './report.js';
 const names = ['api-key', 'task-file', 'evidence-file', 'head-sha', 'steps', 'needs',
+  'scope', 'change-file', 'base-sha', 'contract-sha256',
   'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file'];
 const escapeCommand = x => String(x).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 export async function run(env = process.env, fetchImpl = fetch) {
@@ -18,7 +19,8 @@ export async function run(env = process.env, fetchImpl = fetch) {
     config = configuration(raw);
     const task = await readJson(raw['task-file']);
     const evidence = await readJson(raw['evidence-file']);
-    corpus = buildCorpus(task, evidence, raw, env);
+    const change = raw['change-file'] ? await readJson(raw['change-file']) : undefined;
+    corpus = buildCorpus(task, evidence, raw, env, change);
     const key = raw['api-key'] || env.TYPESAFE_API_KEY;
     if (key) process.stdout.write(`::add-mask::${escapeCommand(key)}\n`);
     result = await evaluate(corpus, config, key, fetchImpl);
@@ -29,7 +31,10 @@ export async function run(env = process.env, fetchImpl = fetch) {
   }
   if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
   result.guidance = guidance(result);
-  result.version = 3;
+  result.scope = corpus?.scope || raw.scope || 'pull-request';
+  result.coverage ||= { verdict: result.scope === 'acceptance' ? 'not-assessed' : 'unverified' };
+  result.mergeReadiness = 'not-established';
+  result.version = 4;
   result['duration-ms'] = Math.round(performance.now() - start);
   const reportFile = raw['report-file'] || 'rev-report.json';
   // Write the report before approval outputs: a reporting failure must not publish approval.
@@ -37,6 +42,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
   if (env.GITHUB_STEP_SUMMARY) await appendFile(env.GITHUB_STEP_SUMMARY, summary(result));
   if (env.GITHUB_OUTPUT) {
     const outputs = { decision: result.decision, approved: result.approved, reason: result.reason,
+      scope: result.scope, coverage: result.coverage.verdict, 'merge-readiness': result.mergeReadiness,
       'head-sha': result.headSha || '', verified: result.criteria.filter(c => c.verdict === 'satisfied').length,
       total: result.criteria.length, 'report-file': reportFile, model: result.model || '', 'duration-ms': result['duration-ms'] };
     await appendFile(env.GITHUB_OUTPUT, Object.entries(outputs).map(([name, value]) => {

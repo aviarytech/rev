@@ -13,7 +13,7 @@ try {
   }
   const evidence = { version: 1, headSha, items };
   // Reuse input validation, including the aggregate size bound.
-  buildCorpus({ version: 1, task: 'Validate evidence manifest', criteria: [{ id: 'validation', description: 'Validate evidence manifest' }] }, evidence, { 'head-sha': headSha });
+  buildCorpus({ version: 1, task: 'Validate evidence manifest', criteria: [{ id: 'validation', description: 'Validate evidence manifest' }] }, evidence, { scope: 'acceptance', 'head-sha': headSha });
   await writeFile(output, JSON.stringify(evidence) + '\n');
 } catch {
   console.error('Could not collect evidence. Check the SHA, source manifest, file paths, UTF-8 encoding and 1 MiB total limit.');
