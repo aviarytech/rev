@@ -31,7 +31,7 @@ for (const fixture of cases) {
         criterionMismatch: fixture.expected !== undefined && JSON.stringify(fixture.expected) !== JSON.stringify(result.criteria.map(c => c.verdict)),
         reasonMismatch: fixture.expectedReason !== undefined && fixture.expectedReason !== result.reason,
       });
-    } catch (error) { results.push({ name: fixture.name, strategy, error: error.code || 'evaluation-error', durationMs: Date.now() - start }); }
+    } catch (error) { results.push({ name: fixture.name, strategy, error: error.code || 'evaluation-error', diagnostics: error.diagnostics, durationMs: Date.now() - start }); }
     console.log(JSON.stringify({ name: fixture.name, strategy, ...Object.fromEntries(['approved','reason','error','falseApproval','falseDenial','coverageMismatch'].map(k => [k, results.at(-1)[k]])) }));
     // Preserve partial experiments even when a later request or workflow fails.
     await writeFile('rev-comparison-report.json', JSON.stringify({ config, results }, null, 2) + '\n');

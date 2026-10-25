@@ -113,3 +113,27 @@ successful detections. Low scores are not measured correctness probabilities.
 This is a development comparison, not a held-out certification. Promote a
 candidate only after reviewing its failures and costs; never merge downstream
 PRs using this replay as a substitute for fresh checks.
+
+### First paired result: do not promote focused evaluation
+
+Candidate `8844c2d` completed 32 cases per strategy. Baseline had zero API errors
+and four coverage-label mismatches. Focused had two invalid-response errors and
+four coverage-label mismatches among its completed cases, including a synthetic
+coverage regression. Both reported zero false approvals and false denials on
+approval-labeled cases; neither real original is approval-labeled. Baseline
+returned unverified coverage for both real originals. Focused errored on one and
+returned unverified on the other. It therefore did not resolve the rollout.
+
+Aggregate results and the private full report's SHA-256 are preserved in
+`eval/results/2026-10-25-real-pr-comparison.json`. Errors are separate from
+mismatches, not successes. The original runner omitted structural error details;
+future runs retain the existing safe GateError diagnostics, but the exact fields
+responsible for these two errors cannot be reconstructed. No unchanged-input
+retry was used to replace this result.
+
+The focused implementation remains experimental and is **not promoted**. The
+production change is limited to advisory diagnostics: identify unresolved targets,
+distinguish below-threshold covered choices from missing-coverage choices, and
+retain concurrent criterion evidence gaps. These diagnostics do not invent a
+specific unmet obligation where the model supplied none. The comparison does not
+justify merging either downstream rollout or weakening approval thresholds.
