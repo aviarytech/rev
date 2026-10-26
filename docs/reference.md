@@ -111,3 +111,32 @@ Normal reasons: `criteria-verified`, `criteria-violated`, `criteria-unverified`.
 Preflight and error reasons: `ci-not-successful`, `missing-ci-results`, `missing-evidence`, `missing-input`, `invalid-file`, `invalid-task`, `invalid-evidence`, `invalid-context`, `invalid-head-sha`, `stale-evidence`, `too-many-assessments`, `evidence-too-large`, `invalid-step`, `invalid-step-status`, `invalid-job-status`, `invalid-configuration`, `missing-api-key`, `invalid-response`, `response-too-large`, `api-timeout`, `api-unavailable`, `api-http-<status>`, `internal-error`.
 
 Approval exits 0; denial or error exits 1. Reporting failures also exit 1 and must not be treated as approval. No arbitrary policy replacement is supported in this version: the acceptance criteria define the task, and the evaluation rules stay fixed.
+
+### Advisory denial diagnostics (opt-in)
+
+Set `diagnose-denials: 'true'` to diagnose model denials after the gate has already
+made its decision. Up to two additional TypeSafe Choice requests share a separate
+`timeout-ms` deadline. Approval, reasons, thresholds and exit status are unchanged.
+Approvals, malformed inputs and deterministic CI failures do not invoke this pass.
+Provider failures leave the original denial intact and report diagnostic uncertainty.
+
+The first round selects a gap category, an exact requirement span and a supplied
+source. The second selects an evidence block that grounds that particular claim,
+with `none` available in both rounds. Choices must meet the existing probability
+and confidence thresholds. Unknown IDs, malformed distributions and out-of-range
+references are rejected. All content remains untrusted data.
+
+Reports contain `denialDiagnostics`: advisory findings or explicit “Evaluator
+uncertainty—no actionable defect identified.” Each finding includes an obligation
+source with zero-based, end-exclusive character offsets, a citation with one-based
+inclusive line numbers **within supplied source content**, and a concrete next
+check. Evidence blocks can be grouped files or diffs; these are not repository
+line numbers. Raw evidence, selected quotations and original request text are not
+copied into reports. Existing source labels must still be suitable for publication.
+Local validation establishes reference existence, not the truth of the model's
+interpretation. A diagnostic finding is not a confirmed bug.
+
+At most 20 unresolved targets are diagnosed per run, prioritizing criterion gaps;
+remaining target IDs are explicitly listed. Each request is bounded to 1 MiB and
+responses use the existing transport limits. Large inputs produce uncertainty,
+never silent evidence truncation. There are no retries or automatic repairs.
