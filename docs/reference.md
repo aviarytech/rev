@@ -150,3 +150,10 @@ Byte counts are diagnostics, not token estimates. Jev 1.14's default limits are
 64k tokens per request and 32k for state plus each question; REV's byte limit does
 not guarantee that a request fits those token limits. No automatic long-context
 mode, evidence truncation or retry is performed.
+
+A malformed diagnostic answer affects only its target. Other independently valid
+findings survive, and the overall diagnostic status becomes `partial`. The affected
+target retains uncertainty and safe structural validation details. Probability
+normalization requirements are not relaxed: a distribution totaling 0.99 is still
+rejected. Transport-wide failures remain `unavailable`. Neither status changes
+the original gate decision.

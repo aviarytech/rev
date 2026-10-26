@@ -19,4 +19,4 @@ for(const [i,dir] of process.argv.slice(2).entries()) {
   await writeFile('rev-diagnosis-report.json',JSON.stringify({config,reports},null,2)+'\n');
   console.log(JSON.stringify({case:i,status:diagnostics.status,findings:diagnostics.findings.map(f=>({target:f.target,status:f.status,gap:f.gap}))}));
 }
-if(reports.some(r=>r.diagnostics.status==='unavailable')) process.exitCode=1;
+if(reports.some(r=>['unavailable','partial'].includes(r.diagnostics.status))) process.exitCode=1;
