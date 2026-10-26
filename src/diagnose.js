@@ -57,7 +57,8 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
   // Two rounds, at most 60 questions per round and 20 findings. Never silently omit targets.
   const targets = all.slice(0,20);
   const sources = sourcesFor(corpus);
-  const fallback = reason => ({status:'unavailable',reason,omittedTargets:all.slice(20).map(t=>t.id),findings:targets.map(t=>uncertain(t,reason))});
+  const assessments = [];
+  const fallback = reason => ({assessments,status:'unavailable',reason,omittedTargets:all.slice(20).map(t=>t.id),findings:targets.map(t=>uncertain(t,reason))});
   if (!apiKey?.trim()) return fallback('missing-api-key');
   const signal = AbortSignal.timeout(config.timeoutMs);
   try {
@@ -79,10 +80,11 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
     for (const [i,t] of targets.entries()) {
       const get = prefix => choice(first.answers?.[`${prefix}_${i}`],Object.keys(questions[`${prefix}_${i}`].criteria),`${prefix}_${i}`);
       const gap=get('gap'), obligation=get('obligation'), source=get('source');
+      assessments.push({target:t.id,round:'candidate',choices:[gap,obligation,source].map((a,j)=>({question:['gap','obligation','source'][j],choice:a.choice,probability:a.probabilities[a.choice],confidence:a.confidence}))});
       if (![gap,obligation,source].every(a=>accepted(a,config)) || gap.choice==='uncertainty' || obligation.choice==='none' || source.choice==='none') continue;
       candidates.push({i,t,gap:gap.choice,obligation:t.obligations[Number(obligation.choice.slice(1))],source:sources[Number(source.choice.slice(1))]});
     }
-    if (!candidates.length) return {status:'complete',omittedTargets:all.slice(20).map(t=>t.id),findings};
+    if (!candidates.length) return {status:'complete',assessments,omittedTargets:all.slice(20).map(t=>t.id),findings};
     const locations = {}, state = {};
     for (const c of candidates) {
       const lines=c.source.content.split('\n');
@@ -95,6 +97,7 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
     const second=await send({model:config.model,state,questions:locations});
     for(const c of candidates) {
       const a=choice(second.answers?.[`location_${c.i}`],Object.keys(locations[`location_${c.i}`].criteria),`location_${c.i}`);
+      assessments.push({target:c.t.id,round:'location',choices:[{question:'location',choice:a.choice,probability:a.probabilities[a.choice],confidence:a.confidence}]});
       if(!accepted(a,config)||a.choice==='none') continue;
       const block=c.blocks[Number(a.choice.slice(1))];
       const {text,...obligation}=c.obligation;
@@ -103,8 +106,10 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
         message:gaps[c.gap],nextCheck:checks[c.gap],
         verification:'Reference existence and ranges validated locally; semantic diagnosis is model-selected, not independently proven.'};
     }
-    return {status:'complete',omittedTargets:all.slice(20).map(t=>t.id),findings};
+    return {status:'complete',assessments,omittedTargets:all.slice(20).map(t=>t.id),findings};
   } catch(error) {
-    return fallback(signal.aborted?'api-timeout':error instanceof GateError?error.code:'diagnostic-error');
+    const report = fallback(signal.aborted?'api-timeout':error instanceof GateError?error.code:'diagnostic-error');
+    if (error instanceof GateError && error.diagnostics) report.validationDiagnostics = error.diagnostics;
+    return report;
   }
 }

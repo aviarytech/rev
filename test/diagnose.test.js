@@ -87,3 +87,11 @@ test('action opt-in preserves the gate denial if the diagnostic service fails',a
     assert.doesNotMatch(await readFile(join(dir,'report.json'),'utf8'),/provider-secret/);
   } finally {await rm(dir,{recursive:true,force:true});}
 });
+test('malformed responses retain safe structural diagnostics instead of hiding the failing field',async()=>{
+  const {corpus,result}=await setup();
+  const report=await diagnose(corpus,result,config,'fake',provider(key=>key.startsWith('source')?'invented-source':choose(key)));
+  assert.equal(report.status,'unavailable');
+  assert.equal(report.validationDiagnostics.question,'source_0');
+  assert.equal(report.validationDiagnostics.issue,'unknown-choice');
+  assert.doesNotMatch(JSON.stringify(report),/invented-source/);
+});
