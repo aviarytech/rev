@@ -2,9 +2,9 @@ import { MAX_BYTES } from './io.js';
 import { sendRequest, GateError, choice } from './gate.js';
 
 const gaps = {
-  missing_implementation: 'Supplied implementation omits behavior explicitly required by the selected obligation.',
+  missing_implementation: 'Necessary implementation evidence for the selected obligation is absent from the supplied material, and no supplied code, assertion or observation demonstrates an incorrect result. Do not select this for an implemented function returning the wrong result; that is contradiction.',
   missing_test: 'Implementation may exist, but supplied assertions or observations do not exercise the selected obligation.',
-  contradiction: 'Supplied current implementation or assertions contradict the selected obligation.',
+  contradiction: 'Supplied current code, assertions or observations demonstrate a result contrary to the selected obligation. This takes precedence over other categories, including when a missing guard causes the observed wrong result.',
   external_provenance: 'The obligation requires an external run, merge or deployment result; supplied evidence asserts it without independently verifiable provenance.',
   missing_requirement: 'A concrete requested or changed behavior is absent from the acceptance criteria.',
   ambiguous_requirement: 'The selected obligation is ambiguous enough to prevent verification.',

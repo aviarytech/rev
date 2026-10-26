@@ -8,7 +8,7 @@ for(const fixture of diagnosticFixtures()) {
   const diagnostics=await diagnose(fixture.corpus,fixture.result,config,process.env.TYPESAFE_API_KEY);
   const finding=diagnostics.findings[0];
   const match=diagnostics.status==='complete' && (fixture.expectedFinding
-    ? finding?.status==='advisory-finding' && ['contradiction','missing_implementation'].includes(finding.gap)
+    ? finding?.status==='advisory-finding' && finding.gap==='contradiction'
     : finding?.status==='uncertainty');
   results.push({name:fixture.name,expectedFinding:fixture.expectedFinding,match,diagnostics});
   console.log(JSON.stringify({name:fixture.name,match,status:diagnostics.status}));

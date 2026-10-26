@@ -104,3 +104,17 @@ test('controlled diagnostic labels agree with executed probes, including correct
     assert.equal(fixture.result.approved,false);
   }
 });
+test('diagnostic taxonomy prioritizes demonstrated mismatch over absent implementation evidence',async()=>{
+  const {corpus,result}=await setup();
+  let seen=false;
+  await diagnose(corpus,result,config,'fake',provider((key,q)=>{
+    if(key.startsWith('gap')) {
+      seen=true;
+      assert.match(q.criteria.contradiction,/takes precedence/);
+      assert.match(q.criteria.missing_implementation,/evidence.*absent/);
+      assert.match(q.criteria.missing_implementation,/Do not select this.*wrong result/);
+    }
+    return choose(key);
+  }));
+  assert.equal(seen,true);
+});
