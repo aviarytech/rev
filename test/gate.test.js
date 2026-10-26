@@ -149,3 +149,25 @@ test('malformed answers expose bounded structural diagnostics without provider s
     });
   }
 });
+test('HTTP 400 diagnostics identify context rejection without leaking provider text or changing denial', async () => {
+  for (const detail of [
+    {code:'max_tokens_exceeded',message:'PRIVATE request echo'},
+    'max_tokens_exceeded: PRIVATE request echo',
+    {message:'PRIVATE unrelated validation error'},
+  ]) {
+    let calls=0;
+    await assert.rejects(evaluate(corpus(),config,'key',async()=>{
+      calls++;
+      return new Response(JSON.stringify({detail}),{status:400});
+    }), error=>{
+      assert.equal(error.code,'api-http-400');
+      assert.equal(error.diagnostics.issue,JSON.stringify(detail).includes('max_tokens_exceeded')?'model-context-limit':'provider-rejected-request');
+      assert.ok(error.diagnostics.requestBytes>error.diagnostics.stateBytes);
+      assert.ok(error.diagnostics.questions>0);
+      assert.doesNotMatch(JSON.stringify(error),/PRIVATE/);
+      return true;
+    });
+    assert.equal(calls,1);
+  }
+  await assert.rejects(evaluate(corpus(),config,'key',async()=>new Response('PRIVATE malformed error',{status:400})),{code:'api-http-400'});
+});

@@ -195,8 +195,25 @@ export async function sendRequest(body, apiKey, fetchImpl, signal) {
     body: JSON.stringify(body), redirect: 'error', signal,
   });
   if (!response.ok) {
-    await response.body?.cancel();
-    throw new GateError(`api-http-${response.status}`);
+    // Read only the existing bounded JSON envelope. Never publish provider text,
+    // request echoes, URLs or arbitrary error codes. Keep HTTP failures stable.
+    let issue = 'provider-rejected-request';
+    if (response.status === 400) {
+      try {
+        const error = await boundedJson(response);
+        const detail = error?.detail;
+        const fields = [error?.code, detail?.code, detail?.type,
+          typeof detail === 'string' ? detail : detail?.message];
+        if (fields.some(value => typeof value === 'string' && /\bmax_tokens_exceeded\b/.test(value))) {
+          issue = 'model-context-limit';
+        }
+      } catch { /* Malformed or oversized errors still report only HTTP status. */ }
+    } else { await response.body?.cancel(); }
+    throw new GateError(`api-http-${response.status}`, {
+      issue, requestBytes: Buffer.byteLength(JSON.stringify(body)),
+      stateBytes: Buffer.byteLength(JSON.stringify(body.state)),
+      questions: Object.keys(body.questions).length,
+    });
   }
   return boundedJson(response);
 }

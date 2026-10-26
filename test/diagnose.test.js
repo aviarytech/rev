@@ -90,9 +90,9 @@ test('action opt-in preserves the gate denial if the diagnostic service fails',a
 test('malformed responses retain safe structural diagnostics instead of hiding the failing field',async()=>{
   const {corpus,result}=await setup();
   const report=await diagnose(corpus,result,config,'fake',provider(key=>key.startsWith('source')?'invented-source':choose(key)));
-  assert.equal(report.status,'unavailable');
-  assert.equal(report.validationDiagnostics.question,'source_0');
-  assert.equal(report.validationDiagnostics.issue,'unknown-choice');
+  assert.equal(report.status,'partial');
+  assert.equal(report.findings[0].validationDiagnostics.question,'source_0');
+  assert.equal(report.findings[0].validationDiagnostics.issue,'unknown-choice');
   assert.doesNotMatch(JSON.stringify(report),/invented-source/);
 });
 test('controlled diagnostic labels agree with executed probes, including correct code denied artificially',async()=>{
@@ -117,4 +117,24 @@ test('diagnostic taxonomy prioritizes demonstrated mismatch over absent implemen
     return choose(key);
   }));
   assert.equal(seen,true);
+});
+test('one malformed target cannot erase another target finding in either diagnostic round',async()=>{
+  for(const badRound of ['obligation_0','location_0']) {
+    const {corpus,result}=await setup();
+    result.criteria.push({...corpus.task.criteria[1],verdict:'unverified'});
+    const before=structuredClone(result);
+    const valid=provider(choose);
+    const report=await diagnose(corpus,result,config,'fake',async(...args)=>{
+      const data=await(await valid(...args)).json();
+      if(data.answers[badRound]) {
+        const a=data.answers[badRound];a.probabilities[a.choice]=.99;
+      }
+      return new Response(JSON.stringify(data));
+    });
+    assert.equal(report.status,'partial');
+    assert.equal(report.findings[0].status,'uncertainty');
+    assert.equal(report.findings[0].validationDiagnostics.issue,'probability-total');
+    assert.equal(report.findings[1].status,'advisory-finding');
+    assert.deepEqual(result,before);
+  }
 });
