@@ -119,7 +119,9 @@ export function choice(answer, options, question) {
   if (options.some(k => !probability(p[k]))) invalid('probability-range');
   const total = options.reduce((sum, k) => sum + p[k], 0);
   if (Math.abs(total - 1) > 0.001) invalid('probability-total', { total });
-  if (options.some(k => p[k] > p[answer.choice])) invalid('choice-not-maximum', {
+  // Ignore only machine-precision arithmetic noise in tied probabilities. This does not
+  // change score thresholds, normalize distributions or accept meaningful gaps.
+  if (options.some(k => p[k] - p[answer.choice] > Number.EPSILON)) invalid('choice-not-maximum', {
     selectedProbability: p[answer.choice], maximumProbability: Math.max(...options.map(k => p[k])),
   });
   return answer;
