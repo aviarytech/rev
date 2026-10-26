@@ -179,6 +179,33 @@ test('maximum-choice validation tolerates binary rounding ties but rejects meani
   const lower=structuredClone(tied);
   lower.probabilities.a-=1e-12;lower.probabilities.b+=1e-12;
   assert.throws(()=>choice(lower,options,'not-tie'),error=>error.diagnostics.issue==='choice-not-maximum');
-  const malformed=structuredClone(tied);malformed.probabilities.e=.15;
+  const malformed=structuredClone(tied);malformed.probabilities.e=.14;
   assert.throws(()=>choice(malformed,options,'bad-total'),error=>error.diagnostics.issue==='probability-total');
+});
+
+test('hundredth-rounded totals are accepted without normalizing scores or lifting denials', async () => {
+  const { choice } = await import('../src/gate.js');
+  const options = ['satisfied', 'violated', 'unverified'];
+  for (const probabilities of [
+    { satisfied: .91, violated: .04, unverified: .04 },
+    { satisfied: .91, violated: .05, unverified: .05 },
+  ]) {
+    const answer = { type: 'choice', choice: 'satisfied', confidence: .9, probabilities };
+    assert.equal(choice(answer, options, 'rounded'), answer);
+    const r = response(); r.answers.criterion_0 = answer;
+    assert.equal(decisionFromResponse(r, config, corpus()).approved, true);
+  }
+  const r = response();
+  r.answers.criterion_0.probabilities = { satisfied: .89, violated: .05, unverified: .05 };
+  const result = decisionFromResponse(r, config, corpus());
+  assert.equal(result.approved, false);
+  assert.equal(result.criteria[0].probability, .89);
+  for (const probabilities of [
+    { satisfied: .91, violated: .03, unverified: .04 },
+    { satisfied: .91, violated: .06, unverified: .05 },
+    { satisfied: .911, violated: .039, unverified: .04 },
+  ]) {
+    assert.throws(() => choice({ type: 'choice', choice: 'satisfied', confidence: .9, probabilities }, options, 'invalid'),
+      error => error.diagnostics.issue === 'probability-total');
+  }
 });

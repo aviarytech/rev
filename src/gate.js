@@ -118,7 +118,12 @@ export function choice(answer, options, question) {
     || options.some(k => !Object.hasOwn(p, k))) invalid('probability-keys');
   if (options.some(k => !probability(p[k]))) invalid('probability-range');
   const total = options.reduce((sum, k) => sum + p[k], 0);
-  if (Math.abs(total - 1) > 0.001) invalid('probability-total', { total });
+  // The provider rounds distributions to hundredths. Permit at most one
+  // percentage point of total error, and only for hundredth-rounded values.
+  // Keep raw scores: renormalizing could lift a denial above the threshold.
+  const rounded = options.every(k => Math.abs(p[k] * 100 - Math.round(p[k] * 100)) <= 100 * Number.EPSILON);
+  const tolerance = rounded ? 0.01 + options.length * Number.EPSILON : 0.001;
+  if (Math.abs(total - 1) > tolerance) invalid('probability-total', { total });
   // Ignore only machine-precision arithmetic noise in tied probabilities. This does not
   // change score thresholds, normalize distributions or accept meaningful gaps.
   if (options.some(k => p[k] - p[answer.choice] > Number.EPSILON)) invalid('choice-not-maximum', {
