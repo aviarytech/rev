@@ -62,12 +62,26 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
   if (!apiKey?.trim()) return fallback('missing-api-key');
   const signal = AbortSignal.timeout(config.timeoutMs);
   try {
+    // Store each exact obligation once, even when several files map to it.
+    // Questions reference shared state instead of repeating the entire contract.
+    const diagnosticObligations = {}, diagnosticTargets = {}, obligationKeys = new Map();
     const questions = {};
     for (const [i,t] of targets.entries()) {
       if (t.obligations.length > 254) return fallback('too-many-diagnostic-obligations');
-      const instructions = {rules,target:t.id,obligations:t.obligations};
+      const references = Object.fromEntries(t.obligations.map((o,j) => {
+        const identity = JSON.stringify([o.source,o.start,o.end]);
+        if (!obligationKeys.has(identity)) {
+          const key = `obligation_${obligationKeys.size}`;
+          obligationKeys.set(identity,key);
+          diagnosticObligations[key] = o;
+        }
+        return [`o${j}`, {reference:`state.diagnosticObligations.${obligationKeys.get(identity)}`}];
+      }));
+      diagnosticTargets[`target_${i}`] = {id:t.id,obligations:references};
+      const instructions = {rules,target:`state.diagnosticTargets.target_${i}`,
+        task:'Resolve each obligation reference in state.diagnosticObligations to its exact text and original source offsets. Diagnose only this target against the full supplied corpus.'};
       questions[`gap_${i}`] = {type:'choice',instructions,criteria:gaps};
-      questions[`obligation_${i}`] = {type:'choice',instructions,criteria:{none:'No exact obligation can be selected.',...Object.fromEntries(t.obligations.map((o,j)=>[`o${j}`,o.text]))}};
+      questions[`obligation_${i}`] = {type:'choice',instructions,criteria:{none:'No exact obligation can be selected.',...references}};
       questions[`source_${i}`] = {type:'choice',instructions:{...instructions,task:'Select the source that most directly exhibits the concrete gap, not merely a topic match. Use none for unsupported or speculative findings.'},criteria:{none:'No source grounds a concrete gap.',...Object.fromEntries(sources.map((s,j)=>[`s${j}`,{id:s.id,source:s.source}]))}};
     }
     if (!targets.length) return {status:'complete',findings:[]};
@@ -75,7 +89,7 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
       if (Buffer.byteLength(JSON.stringify(body)) > MAX_BYTES) throw new GateError('diagnostic-input-too-large');
       return sendRequest(body,apiKey,fetchImpl,signal);
     };
-    const first = await send({model:config.model,state:corpus,questions});
+    const first = await send({model:config.model,state:{...corpus,diagnosticObligations,diagnosticTargets},questions});
     const candidates = [], findings = targets.map(t=>uncertain(t,'unsubstantiated-diagnosis'));
     let partial = false;
     const invalidTarget = (i, error) => {
