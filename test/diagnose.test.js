@@ -95,3 +95,12 @@ test('malformed responses retain safe structural diagnostics instead of hiding t
   assert.equal(report.validationDiagnostics.issue,'unknown-choice');
   assert.doesNotMatch(JSON.stringify(report),/invented-source/);
 });
+test('controlled diagnostic labels agree with executed probes, including correct code denied artificially',async()=>{
+  const {diagnosticFixtures}=await import('../eval/diagnostic-fixtures.js');
+  const cases=diagnosticFixtures();
+  for(const fixture of cases) {
+    const probe=JSON.parse(fixture.corpus.evidence.find(e=>e.id==='probe').content);
+    assert.equal(probe.observed.status!==probe.expectedStatus,fixture.expectedFinding);
+    assert.equal(fixture.result.approved,false);
+  }
+});
