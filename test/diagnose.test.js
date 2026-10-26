@@ -127,7 +127,7 @@ test('one malformed target cannot erase another target finding in either diagnos
     const report=await diagnose(corpus,result,config,'fake',async(...args)=>{
       const data=await(await valid(...args)).json();
       if(data.answers[badRound]) {
-        const a=data.answers[badRound];a.probabilities[a.choice]=.99;
+        const a=data.answers[badRound];a.probabilities[a.choice]=.97;
       }
       return new Response(JSON.stringify(data));
     });
