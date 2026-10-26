@@ -171,3 +171,14 @@ test('HTTP 400 diagnostics identify context rejection without leaking provider t
   }
   await assert.rejects(evaluate(corpus(),config,'key',async()=>new Response('PRIVATE malformed error',{status:400})),{code:'api-http-400'});
 });
+test('maximum-choice validation tolerates binary rounding ties but rejects meaningful differences', async () => {
+  const { choice } = await import('../src/gate.js');
+  const options=['a','b','c','d','e'];
+  const tied={type:'choice',choice:'a',confidence:.1,probabilities:{a:.22999999999999998,b:.23,c:.2,d:.18,e:.16}};
+  assert.equal(choice(tied,options,'tie'),tied);
+  const lower=structuredClone(tied);
+  lower.probabilities.a-=1e-12;lower.probabilities.b+=1e-12;
+  assert.throws(()=>choice(lower,options,'not-tie'),error=>error.diagnostics.issue==='choice-not-maximum');
+  const malformed=structuredClone(tied);malformed.probabilities.e=.15;
+  assert.throws(()=>choice(malformed,options,'bad-total'),error=>error.diagnostics.issue==='probability-total');
+});
