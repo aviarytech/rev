@@ -138,3 +138,30 @@ test('one malformed target cannot erase another target finding in either diagnos
     assert.deepEqual(result,before);
   }
 });
+
+test('shared obligation references preserve all targets and full evidence without repeating text in questions',async()=>{
+  const {corpus,result}=await setup();
+  result.criteria.push({...result.criteria[0]});
+  const originalCorpus=structuredClone(corpus), originalResult=structuredClone(result);
+  let calls=0;
+  const report=await diagnose(corpus,result,config,'fake',provider((key,q,body)=>{
+    calls++;
+    if (key.startsWith('gap')) {
+      const targetKey=q.instructions.target.split('.').at(-1);
+      const target=body.state.diagnosticTargets[targetKey];
+      assert.equal(target.id,`criterion:${corpus.task.criteria[0].id}`);
+      const obligationKey=target.obligations.o0.reference.split('.').at(-1);
+      const obligation=body.state.diagnosticObligations[obligationKey];
+      assert.equal(obligation.text,corpus.task.criteria[0].description.slice(obligation.start,obligation.end));
+      assert.deepEqual(body.state.evidence,corpus.evidence);
+      assert.equal(Object.keys(body.state.diagnosticTargets).length,2);
+      assert.equal(JSON.stringify(body.questions).includes(obligation.text),false);
+      assert.deepEqual(body.questions.obligation_0.criteria.o0,body.questions.obligation_1.criteria.o0);
+    }
+    return key.startsWith('gap')?'uncertainty':'none';
+  }));
+  assert.equal(calls,6);
+  assert.equal(report.findings.length,2);
+  assert.deepEqual(corpus,originalCorpus);
+  assert.deepEqual(result,originalResult);
+});
