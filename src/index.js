@@ -5,10 +5,11 @@ import { buildCorpus } from './corpus.js';
 import { configuration, evaluate, blockedResult, GateError } from './gate.js';
 import { readJson } from './io.js';
 import { guidance } from './guidance.js';
+import { diagnose } from './diagnose.js';
 import { summary } from './report.js';
 const names = ['api-key', 'task-file', 'evidence-file', 'head-sha', 'steps', 'needs',
   'scope', 'change-file', 'base-sha', 'contract-sha256',
-  'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file'];
+  'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file', 'diagnose-denials'];
 const escapeCommand = x => String(x).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 export async function run(env = process.env, fetchImpl = fetch) {
   const start = performance.now();
@@ -28,6 +29,9 @@ export async function run(env = process.env, fetchImpl = fetch) {
     const reason = error instanceof GateError ? error.code : 'internal-error';
     result = corpus ? blockedResult(corpus, reason) : { decision: 'deny', approved: false, reason, criteria: [] };
     if (error instanceof GateError && error.diagnostics) result.diagnostics = error.diagnostics;
+  }
+  if (raw['diagnose-denials'] === 'true' && corpus && config) {
+    result.denialDiagnostics = await diagnose(corpus, result, config, raw['api-key'] || env.TYPESAFE_API_KEY, fetchImpl);
   }
   if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
   result.guidance = guidance(result);

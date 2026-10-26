@@ -35,6 +35,9 @@ inputs:
   needs:
     description: All applicable dependency job results as toJSON(needs).
     default: '{}'
+  diagnose-denials:
+    description: Run an advisory, citation-checked diagnostic pass after model denial. Never changes approval. Up to two extra requests with a shared timeout-ms deadline.
+    default: 'false'
   report-file:
     description: Where to write the machine-readable verdict report. Contains criterion text and source names, not evidence content.
     default: rev-report.json

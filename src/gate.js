@@ -105,7 +105,7 @@ async function boundedJson(response) {
   }
 }
 
-function choice(answer, options, question) {
+export function choice(answer, options, question) {
   // Diagnostics use only local field names and finite numeric aggregates.
   // Never copy provider strings, response bodies, instructions or evidence.
   const invalid = (issue, extra = {}) => { throw new GateError('invalid-response', { question, issue, ...extra }); };

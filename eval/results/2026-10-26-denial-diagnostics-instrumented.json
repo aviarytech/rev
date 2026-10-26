@@ -1,0 +1,19 @@
+{
+  "candidate": "c7f530e6bf2555872426a5dd063429ac3e04ee4a",
+  "reportSha256": "0721ec4bd1fff3e1c508a4badf08887a53831b2c2ca774b5b094098a63f15ccd",
+  "results": [
+    {
+      "case": 0,
+      "status": "complete",
+      "advisoryFindings": 0,
+      "uncertainties": 6
+    },
+    {
+      "case": 1,
+      "status": "complete",
+      "advisoryFindings": 0,
+      "uncertainties": 8
+    }
+  ],
+  "interpretation": "Transport completed, but all targets remained uncertain. This is not demonstrated diagnostic utility. Earlier invalid-response failure did not recur; cause is unconfirmed. Both runs are retained."
+}

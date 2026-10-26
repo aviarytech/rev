@@ -1,0 +1,98 @@
+{
+  "config": {
+    "model": "jev-1.14.0",
+    "minProbability": 0.9,
+    "minConfidence": 0.8,
+    "timeoutMs": 60000
+  },
+  "results": [
+    {
+      "name": "correct-code-artificial-denial",
+      "expectedFinding": false,
+      "match": true,
+      "diagnostics": {
+        "status": "complete",
+        "assessments": [
+          {
+            "target": "criterion:null-user",
+            "round": "candidate",
+            "choices": [
+              {
+                "question": "gap",
+                "choice": "uncertainty",
+                "probability": 0.99,
+                "confidence": 0.99
+              },
+              {
+                "question": "obligation",
+                "choice": "o0",
+                "probability": 0.95,
+                "confidence": 0.9
+              },
+              {
+                "question": "source",
+                "choice": "none",
+                "probability": 0.98,
+                "confidence": 0.97
+              }
+            ]
+          }
+        ],
+        "omittedTargets": [],
+        "findings": [
+          {
+            "target": "criterion:null-user",
+            "status": "uncertainty",
+            "reason": "unsubstantiated-diagnosis",
+            "message": "Evaluator uncertainty—no actionable defect identified.",
+            "nextCheck": "Independently compare this target with its requirements and evidence; do not change code solely to raise the score."
+          }
+        ]
+      }
+    },
+    {
+      "name": "demonstrated-wrong-status",
+      "expectedFinding": true,
+      "match": false,
+      "diagnostics": {
+        "status": "complete",
+        "assessments": [
+          {
+            "target": "criterion:null-user",
+            "round": "candidate",
+            "choices": [
+              {
+                "question": "gap",
+                "choice": "missing_implementation",
+                "probability": 0.75,
+                "confidence": 0.71
+              },
+              {
+                "question": "obligation",
+                "choice": "o0",
+                "probability": 0.99,
+                "confidence": 0.98
+              },
+              {
+                "question": "source",
+                "choice": "s1",
+                "probability": 0.96,
+                "confidence": 0.94
+              }
+            ]
+          }
+        ],
+        "omittedTargets": [],
+        "findings": [
+          {
+            "target": "criterion:null-user",
+            "status": "uncertainty",
+            "reason": "unsubstantiated-diagnosis",
+            "message": "Evaluator uncertainty—no actionable defect identified.",
+            "nextCheck": "Independently compare this target with its requirements and evidence; do not change code solely to raise the score."
+          }
+        ]
+      }
+    }
+  ]
+}

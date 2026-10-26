@@ -1,0 +1,27 @@
+{
+  "candidate": "547169ce829cfc6622ab96f388d8b458c21beb23",
+  "reportSha256": "7c74bea14af0af8d60297865489f7fecb2b7cd4a7161a9f8c429847eeb11c61f",
+  "config": {
+    "model": "jev-1.14.0",
+    "minProbability": 0.9,
+    "minConfidence": 0.8,
+    "timeoutMs": 60000
+  },
+  "results": [
+    {
+      "case": 0,
+      "status": "complete",
+      "reason": null,
+      "actionableFindings": 0,
+      "uncertainties": 6
+    },
+    {
+      "case": 1,
+      "status": "unavailable",
+      "reason": "invalid-response",
+      "actionableFindings": 0,
+      "uncertainties": 8
+    }
+  ],
+  "limitation": "Initial diagnostic runner omitted safe validation field details. This run does not establish useful diagnosis; do not enable production callers."
+}
