@@ -38,7 +38,7 @@ node rev/scripts/tests-change.js BASE_SHA HEAD_SHA .rev/contract.json .rev/task.
 TYPESAFE_API_KEY=… node rev/scripts/review-contract.js .rev/task.json change.json --pin OWNER/REPO PR_NUMBER
 ```
 
-`review-contract.js` reads named test sources from Git blobs, asks Jev about request coverage and each criterion's tests, and sets `REV_CONTRACT_PR_<n>` only if every answer is positive and meets the probability (0.9) and confidence (0.8) thresholds. It is operator-invoked; PR content never pins its own digest. Without `--pin` it prints the result only.
+`review-contract.js` reads named test sources from Git blobs, asks Jev three separate questions (request coverage; whether each criterion's named tests assert all of its obligations; whether its path globs are scoped to it) and sets `REV_CONTRACT_PR_<n>` only if every answer is positive and meets the probability (0.9) and confidence (0.8) thresholds. It is operator-invoked; PR content never pins its own digest. Without `--pin` it prints the result only.
 
 ## Test reports
 

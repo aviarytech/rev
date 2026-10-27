@@ -133,9 +133,10 @@ test('Jev reviews the contract and exact test sources, and approves only when ev
   const r = await repository();
   try {
     const { change, digest } = collectTestsChange(r.base, r.head, contract, task, r.dir);
-    const reply = (request, tests) => ({ model: 'jev-1.14.0', answers: {
+    const reply = (request, tests, paths = 'scoped') => ({ model: 'jev-1.14.0', answers: {
       coverage_request: answer(request, ['covered', 'missing', 'unverified']),
       tests_0: answer(tests, ['faithful', 'inadequate', 'unverified']),
+      paths_0: answer(paths, ['scoped', 'broad', 'unverified']),
     } });
     let sent;
     const fetchImpl = async (_, init) => { sent = JSON.parse(init.body); return new Response(JSON.stringify(reply('covered', 'faithful'))); };
@@ -143,10 +144,12 @@ test('Jev reviews the contract and exact test sources, and approves only when ev
     assert.equal(result.approved, true);
     assert.equal(result.digest, digest);
     assert.deepEqual(sent.state.sources, [{ path: 'test/export.test.js', content: 'assert.equal(status(), 401);\n' }]);
-    assert.deepEqual(Object.keys(reviewBody(task, change, [], 'm').questions), ['coverage_request', 'tests_0']);
+    assert.deepEqual(Object.keys(reviewBody(task, change, [], 'm').questions), ['coverage_request', 'tests_0', 'paths_0']);
+    assert.deepEqual(result.assessments.map(a => a.target), ['request', 'anonymous tests', 'anonymous paths']);
     const config = configuration();
     assert.equal(reviewDecision(reply('covered', 'inadequate'), task, config).approved, false);
     assert.equal(reviewDecision(reply('missing', 'faithful'), task, config).approved, false);
+    assert.equal(reviewDecision(reply('covered', 'faithful', 'broad'), task, config).approved, false);
     const low = reply('covered', 'faithful'); low.answers.tests_0.confidence = 0.5;
     assert.equal(reviewDecision(low, task, config).approved, false);
     await assert.rejects(reviewContract(task, change, { cwd: r.dir, fetchImpl }), /missing-api-key/);
