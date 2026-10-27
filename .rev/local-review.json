@@ -1,0 +1,1 @@
+{"version":1,"workflows":[{"file":"ci.yml","jobs":["test (ubuntu-latest)","test (macos-latest)","test (windows-latest)"]}]}
