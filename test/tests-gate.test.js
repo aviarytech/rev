@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { evaluateTests, glob, testsGuidance } from '../src/tests.js';
 import { parseJUnit, testReport } from '../scripts/junit.js';
 import { collectTestsChange } from '../scripts/tests-change.js';
-import { reviewBody, reviewContract, reviewDecision } from '../scripts/review-contract.js';
+import { excerpt, reviewBody, reviewContract, reviewDecision } from '../scripts/review-contract.js';
 import { configuration } from '../src/gate.js';
 import { run } from '../src/index.js';
 import { answer } from './support.js';
@@ -129,6 +129,18 @@ test('the action runs tests scope without an API key and writes a deterministic 
   } finally { await rm(r.dir, { recursive: true, force: true }); }
 });
 
+test('contract review sends each test with only its file setup code', () => {
+  const file = ["import { status } from '../src/export.js';", 'const user = { id: 1 };', "describe('export', () => {",
+    "  test('rejects anonymous requests', () => {", '    assert.equal(status(), 401);', '  });',
+    "  it(\"allows 'quoted' users\", () => {", '    assert.equal(status(user), 200);', '  });', '});'].join('\n');
+  assert.equal(excerpt(file, 't.js > export > rejects anonymous requests'), [...file.split('\n').slice(0, 2), '// … other tests omitted …', ...file.split('\n').slice(3, 6)].join('\n'));
+  assert.match(excerpt(file, "t.js > export > allows 'quoted' users"), /status\(user\), 200[\s\S]*\}\);$/);
+  assert.doesNotMatch(excerpt(file, "t.js > export > allows 'quoted' users"), /401/);
+  assert.equal(excerpt(file, 't.js > export > absent'), file, 'falls back to the whole file');
+  const oneLine = "import x from 'x';\ndescribe('d', () => {\n  test('a', () => assert.equal(x(), 1));\n  test('b', () => assert.equal(x(), 2));\n});";
+  assert.equal(excerpt(oneLine, 't.js > d > b'), "import x from 'x';\n// … other tests omitted …\n  test('b', () => assert.equal(x(), 2));");
+});
+
 test('Jev reviews the contract and exact test sources, and approves only when every target passes', async () => {
   const r = await repository();
   try {
@@ -143,7 +155,7 @@ test('Jev reviews the contract and exact test sources, and approves only when ev
     const result = await reviewContract(task, change, { apiKey: 'key', cwd: r.dir, fetchImpl });
     assert.equal(result.approved, true);
     assert.equal(result.digest, digest);
-    assert.deepEqual(sent.state.sources, [{ path: 'test/export.test.js', content: 'assert.equal(status(), 401);\n' }]);
+    assert.deepEqual(sent.questions.tests_0.instructions.tests, [{ id: ID, source: 'assert.equal(status(), 401);\n' }]);
     assert.deepEqual(Object.keys(reviewBody(task, change, [], 'm').questions), ['coverage_request', 'tests_0', 'paths_0']);
     assert.deepEqual(result.assessments.map(a => a.target), ['request', 'anonymous tests', 'anonymous paths']);
     const config = configuration();
