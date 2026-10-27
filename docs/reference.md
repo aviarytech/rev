@@ -148,8 +148,13 @@ identifying the documented `max_tokens_exceeded` code is classified as
 messages, request echoes and arbitrary error codes are never copied to reports.
 Byte counts are diagnostics, not token estimates. Jev 1.14's default limits are
 64k tokens per request and 32k for state plus each question; REV's byte limit does
-not guarantee that a request fits those token limits. No automatic long-context
-mode, evidence truncation or retry is performed.
+not guarantee that a request fits those token limits. Long context is off by default. Set the action input `long-context: 'true'` to
+explicitly send the documented `TypeSafe-Danger-Zone-Long-Context: true` header
+for both evaluation and advisory diagnostics. This preserves the complete corpus
+and question set and does not change model, thresholds or response validation.
+Invalid boolean values fail configuration. No automatic escalation, evidence
+truncation or retry is performed. Provider limits still apply; HTTP rejections
+remain denials. See https://api.typesafe.ai/openapi.json for the transport option.
 
 A malformed diagnostic answer affects only its target. Other independently valid
 findings survive, and the overall diagnostic status becomes `partial`. The affected

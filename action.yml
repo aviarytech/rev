@@ -44,6 +44,9 @@ inputs:
   model:
     description: TypeSafe model ID. Changes require reevaluation.
     default: jev-1.14.0
+  long-context:
+    description: Explicitly enable TypeSafe long context for complete evidence that exceeds default token limits. No truncation, retries or threshold changes.
+    default: 'false'
   min-probability:
     description: Minimum probability for the verdict and each evidence relationship.
     default: '0.9'

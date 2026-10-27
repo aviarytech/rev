@@ -209,3 +209,28 @@ test('hundredth-rounded totals are accepted without normalizing scores or liftin
       error => error.diagnostics.issue === 'probability-total');
   }
 });
+
+test('long context is explicit, preserves full questions/evidence, and never retries or overrides denial', async () => {
+  for (const input of [undefined, 'false', 'true']) {
+    const settings = configuration({ 'long-context': input });
+    let calls = 0;
+    let body;
+    const result = await evaluate(corpus(), settings, 'key', async (_, options) => {
+      calls++;
+      assert.equal(options.headers['TypeSafe-Danger-Zone-Long-Context'], input === 'true' ? 'true' : undefined);
+      body = JSON.parse(options.body);
+      return Response.json(response(['violated', 'satisfied']));
+    });
+    assert.deepEqual(body.state, corpus());
+    assert.equal(Object.keys(body.questions).length, 6);
+    assert.equal(result.approved, false);
+    assert.equal(calls, 1);
+  }
+  for (const input of ['yes', '1', 'TRUE']) assert.throws(() => configuration({ 'long-context': input }), /invalid-configuration/);
+  let calls = 0;
+  await assert.rejects(evaluate(corpus(), configuration({ 'long-context': 'true' }), 'key', async () => {
+    calls++;
+    return Response.json({ detail: 'max_tokens_exceeded' }, { status: 400 });
+  }), { code: 'api-http-400' });
+  assert.equal(calls, 1);
+});
