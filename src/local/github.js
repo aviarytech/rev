@@ -40,14 +40,18 @@ async function checks(api,sha,name) {
   if(result.total_count>100)fail('too-many-review-checks');
   return result.check_runs;
 }
-export async function evaluateLocal(api,repository,number,publicKey,envelope,detailsUrl,now=Date.now()) {
-  let context=await pullContext(api,repository,number);
-  const {pr,expected}=context;
-  if(envelope) {
+export async function recordLocal(api,repository,number,publicKey,envelope,now=Date.now()) {
+  const {pr,expected}=await pullContext(api,repository,number);
+  {
     const verified=open(envelope,publicKey,expected,now); // No write before authentication.
     await api('/check-runs','POST',{name:EVIDENCE_CHECK,head_sha:pr.head.sha,status:'completed',conclusion:'neutral',
       external_id:`rev-local:${digest(envelope)}`,output:{title:'Signed local Claude Code review',summary:verified.approved?'Review completed without findings; CI gate is separate.':'Review has findings or limitations; approval is blocked.',text:JSON.stringify(envelope)}});
   }
+}
+export async function evaluateLocal(api,repository,number,publicKey,envelope,detailsUrl,now=Date.now()) {
+  let context=await pullContext(api,repository,number);
+  const {pr,expected}=context;
+  if(envelope)await recordLocal(api,repository,number,publicKey,envelope,now);
   const attestations=(await checks(api,pr.head.sha,EVIDENCE_CHECK)).sort((a,b)=>b.id-a.id);
   let review;
   for(const check of attestations) {
