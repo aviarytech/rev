@@ -63,3 +63,17 @@ test('CI verifies latest exact PR attempt, rejecting skipped jobs and newer runn
  run.status='in_progress';assert.equal((await ciStatus(api,pr)).state,'pending');
  run.status='completed';run.pull_requests[0]={number:1,head:pr.head,base:{sha:'wrong'}};assert.equal((await ciStatus(api,pr)).state,'pending');
 });
+
+test('signed delivery persists evidence without publishing an approval',async()=>{
+ const {recordLocal}=await import('../src/local/github.js');
+ const writes=[];
+ const api=async(path,method,body)=>{
+  if(method){writes.push(body);return {};}
+  if(path==='/pulls/1')return {state:'open',changed_files:1,head:{sha:expected.headSha},base:{sha:expected.baseSha},title:'change',body:''};
+  if(path==='/pulls/1/files?per_page=100')return [{filename:'x.js'}];
+  throw Error('Recording must not depend on gate refresh or CI');
+ };
+ await recordLocal(api,'a/b',1,keys.publicKey,seal(payload,keys.privateKey),now);
+ assert.equal(writes.length,1);assert.equal(writes[0].name,'REV local attestation');assert.equal(writes[0].conclusion,'neutral');
+ assert.equal(open(JSON.parse(writes[0].output.text),keys.publicKey,expected,now).approved,true);
+});
