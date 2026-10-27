@@ -9,7 +9,7 @@ import { diagnose } from './diagnose.js';
 import { summary } from './report.js';
 const names = ['api-key', 'task-file', 'evidence-file', 'head-sha', 'steps', 'needs',
   'scope', 'change-file', 'base-sha', 'contract-sha256',
-  'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file', 'diagnose-denials'];
+  'model', 'long-context', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file', 'diagnose-denials'];
 const escapeCommand = x => String(x).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 export async function run(env = process.env, fetchImpl = fetch) {
   const start = performance.now();

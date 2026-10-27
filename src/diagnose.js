@@ -87,7 +87,7 @@ export async function diagnose(corpus, result, config, apiKey, fetchImpl = fetch
     if (!targets.length) return {status:'complete',findings:[]};
     const send = async body => {
       if (Buffer.byteLength(JSON.stringify(body)) > MAX_BYTES) throw new GateError('diagnostic-input-too-large');
-      return sendRequest(body,apiKey,fetchImpl,signal);
+      return sendRequest(body,apiKey,fetchImpl,signal,config);
     };
     const first = await send({model:config.model,state:{...corpus,diagnosticObligations,diagnosticTargets},questions});
     const candidates = [], findings = targets.map(t=>uncertain(t,'unsubstantiated-diagnosis'));

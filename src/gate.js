@@ -10,7 +10,10 @@ function option(value, fallback, min, max) {
   return n;
 }
 export function configuration(raw = {}) {
+  const longContext = raw['long-context']?.trim() || 'false';
+  if (!['true', 'false'].includes(longContext)) throw new GateError('invalid-configuration');
   return {
+    longContext: longContext === 'true',
     model: raw.model?.trim() || 'jev-1.14.0',
     minProbability: option(raw['min-probability'], 0.9, 0.5, 1),
     minConfidence: option(raw['min-confidence'], 0.8, 0, 1),
@@ -188,7 +191,7 @@ export async function evaluate(corpus, config, apiKey, fetchImpl = fetch) {
   if (!apiKey?.trim()) throw new GateError('missing-api-key');
   const signal = AbortSignal.timeout(config.timeoutMs);
   try {
-    return decisionFromResponse(await sendRequest(requestBody(corpus, config), apiKey, fetchImpl, signal), config, corpus);
+    return decisionFromResponse(await sendRequest(requestBody(corpus, config), apiKey, fetchImpl, signal, config), config, corpus);
   } catch (error) {
     if (signal.aborted) throw new GateError('api-timeout');
     if (error instanceof GateError) throw error;
@@ -196,9 +199,10 @@ export async function evaluate(corpus, config, apiKey, fetchImpl = fetch) {
   }
 }
 
-export async function sendRequest(body, apiKey, fetchImpl, signal) {
+export async function sendRequest(body, apiKey, fetchImpl, signal, config = {}) {
   const response = await fetchImpl(ENDPOINT, {
-    method: 'POST', headers: { Authorization: `Bearer ${apiKey.trim()}`, 'Content-Type': 'application/json' },
+    method: 'POST', headers: { Authorization: `Bearer ${apiKey.trim()}`, 'Content-Type': 'application/json',
+      ...(config.longContext === true ? { 'TypeSafe-Danger-Zone-Long-Context': 'true' } : {}) },
     body: JSON.stringify(body), redirect: 'error', signal,
   });
   if (!response.ok) {
