@@ -9,8 +9,9 @@ const unique = a => new Set(a).size === a.length;
 const canonical = value => Array.isArray(value) ? value.map(canonical)
   : object(value) ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
 // Ignore object-key ordering and formatting, but preserve array order and all values.
+export const canonicalDigest = value => createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
 export function contractDigest(task, request, requiredChecks) {
-  return createHash('sha256').update(JSON.stringify(canonical({ task, request, requiredChecks }))).digest('hex');
+  return canonicalDigest({ task, request, requiredChecks });
 }
 
 export function buildCoverage(task, change, raw) {

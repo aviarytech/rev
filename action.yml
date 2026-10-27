@@ -6,10 +6,10 @@ branding:
   color: purple
 inputs:
   scope:
-    description: pull-request requires reviewed request and full change coverage. acceptance explicitly checks only supplied criteria.
+    description: pull-request requires reviewed request and full change coverage. acceptance explicitly checks only supplied criteria. tests is deterministic, needs no API key, and checks named tests against head and merge-base reports.
     default: pull-request
   change-file:
-    description: Complete Git change manifest with original request, required CI jobs and per-file criterion mappings.
+    description: Complete Git change manifest with original request, required CI jobs and per-file criterion mappings. In tests scope, the version 2 manifest from scripts/tests-change.js.
     required: false
   base-sha:
     description: Expected PR base SHA. Required in pull-request scope.
@@ -24,8 +24,14 @@ inputs:
     description: JSON task and acceptance criteria manifest (version 1).
     required: true
   evidence-file:
-    description: JSON evidence manifest with headSha and named source items (version 1).
-    required: true
+    description: JSON evidence manifest with headSha and named source items (version 1). Required outside tests scope.
+    required: false
+  head-report:
+    description: Tests scope. REV test report (scripts/junit.js) of head tests run on head sources.
+    required: false
+  base-report:
+    description: Tests scope. REV test report of the head's test files run on merge-base sources.
+    required: false
   head-sha:
     description: Exact PR head commit expected in the evidence manifest. Not the synthetic merge SHA.
     required: true

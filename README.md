@@ -30,6 +30,10 @@ Version 0.3 defaults to `scope: pull-request`. It requires the original request,
 
 Use the [PR coverage integration guide](docs/pr-coverage.md) for the complete collector, contract and final-job setup. Existing full-SHA pins remain unchanged. Updating an integration to 0.3 requires migration; do not switch to acceptance-only mode to bypass coverage failures.
 
+## Deterministic tests gate
+
+`scope: tests` needs no API key and makes no model call per push. Each criterion names tests and path globs. Code checks that every named test passes on the PR head and does not pass on the merge base, that every changed file is mapped, and that CI succeeded. Jev reviews the contract—request coverage and whether the named tests establish each criterion—once per digest, which binds the exact test file contents. See the [tests gate guide](docs/tests-gate.md).
+
 ## Acceptance-only example
 
 **1. The task.** Write observable requirements before implementation. Store them in a reviewed task manifest:

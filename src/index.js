@@ -6,25 +6,34 @@ import { configuration, evaluate, blockedResult, GateError } from './gate.js';
 import { readJson } from './io.js';
 import { guidance } from './guidance.js';
 import { diagnose } from './diagnose.js';
-import { summary } from './report.js';
+import { summary, testsSummary } from './report.js';
+import { evaluateTests, testsGuidance } from './tests.js';
 const names = ['api-key', 'task-file', 'evidence-file', 'head-sha', 'steps', 'needs',
-  'scope', 'change-file', 'base-sha', 'contract-sha256',
+  'scope', 'change-file', 'base-sha', 'contract-sha256', 'head-report', 'base-report',
   'model', 'min-probability', 'min-confidence', 'timeout-ms', 'report-file', 'diagnose-denials'];
 const escapeCommand = x => String(x).replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 export async function run(env = process.env, fetchImpl = fetch) {
   const start = performance.now();
   const raw = Object.fromEntries(names.map(n => [n, env[`INPUT_${n.toUpperCase()}`] || '']));
   let result, corpus, config;
+  const tests = raw.scope === 'tests';
   try {
-    if (!raw['task-file'] || !raw['evidence-file']) throw new GateError('missing-input');
-    config = configuration(raw);
-    const task = await readJson(raw['task-file']);
-    const evidence = await readJson(raw['evidence-file']);
-    const change = raw['change-file'] ? await readJson(raw['change-file']) : undefined;
-    corpus = buildCorpus(task, evidence, raw, env, change);
-    const key = raw['api-key'] || env.TYPESAFE_API_KEY;
-    if (key) process.stdout.write(`::add-mask::${escapeCommand(key)}\n`);
-    result = await evaluate(corpus, config, key, fetchImpl);
+    if (tests) {
+      // Deterministic scope: no API key, model or network.
+      if (!raw['task-file'] || !raw['change-file'] || !raw['head-report'] || !raw['base-report']) throw new GateError('missing-input');
+      const [task, change, head, base] = await Promise.all(['task-file', 'change-file', 'head-report', 'base-report'].map(n => readJson(raw[n])));
+      result = evaluateTests(task, change, head, base, raw);
+    } else {
+      if (!raw['task-file'] || !raw['evidence-file']) throw new GateError('missing-input');
+      config = configuration(raw);
+      const task = await readJson(raw['task-file']);
+      const evidence = await readJson(raw['evidence-file']);
+      const change = raw['change-file'] ? await readJson(raw['change-file']) : undefined;
+      corpus = buildCorpus(task, evidence, raw, env, change);
+      const key = raw['api-key'] || env.TYPESAFE_API_KEY;
+      if (key) process.stdout.write(`::add-mask::${escapeCommand(key)}\n`);
+      result = await evaluate(corpus, config, key, fetchImpl);
+    }
   } catch (error) {
     const reason = error instanceof GateError ? error.code : 'internal-error';
     result = corpus ? blockedResult(corpus, reason) : { decision: 'deny', approved: false, reason, criteria: [] };
@@ -34,7 +43,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
     result.denialDiagnostics = await diagnose(corpus, result, config, raw['api-key'] || env.TYPESAFE_API_KEY, fetchImpl);
   }
   if (config) result.thresholds = { probability: config.minProbability, confidence: config.minConfidence };
-  result.guidance = guidance(result);
+  result.guidance = tests ? testsGuidance(result) : guidance(result);
   result.scope = corpus?.scope || raw.scope || 'pull-request';
   result.coverage ||= { verdict: result.scope === 'acceptance' ? 'not-assessed' : 'unverified' };
   result.mergeReadiness = 'not-established';
@@ -43,7 +52,7 @@ export async function run(env = process.env, fetchImpl = fetch) {
   const reportFile = raw['report-file'] || 'rev-report.json';
   // Write the report before approval outputs: a reporting failure must not publish approval.
   await writeFile(reportFile, JSON.stringify(result, null, 2) + '\n');
-  if (env.GITHUB_STEP_SUMMARY) await appendFile(env.GITHUB_STEP_SUMMARY, summary(result));
+  if (env.GITHUB_STEP_SUMMARY) await appendFile(env.GITHUB_STEP_SUMMARY, tests ? testsSummary(result) : summary(result));
   if (env.GITHUB_OUTPUT) {
     const outputs = { decision: result.decision, approved: result.approved, reason: result.reason,
       scope: result.scope, coverage: result.coverage.verdict, 'merge-readiness': result.mergeReadiness,
