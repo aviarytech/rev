@@ -20,6 +20,7 @@ export async function tick() {
     for(const repository of config.repositories) {
       const api=async path=>gh(`repos/${repository}${path}`);
       try {
+        await api('/contents/.github/workflows/rev-local-review.yml'); // Must exist on the default branch.
         const workflow=await api('/actions/workflows/rev-local-review.yml');
         if(workflow.state!=='active')continue;
         const variable=await api('/actions/variables/REV_LOCAL_REVIEW_PUBLIC_KEY');

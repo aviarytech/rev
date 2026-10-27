@@ -47,3 +47,19 @@ test('gate authenticates before writing and cannot approve unavailable CI',async
  const result=await evaluateLocal(api,'a/b',1,keys.publicKey,seal(payload,keys.privateKey),'url',now);
  assert.equal(result.state,'failure');assert.equal(writes.at(-1).conclusion,'failure');
 });
+
+test('CI verifies latest exact PR attempt, rejecting skipped jobs and newer running runs',async()=>{
+ const {ciStatus}=await import('../src/local/github.js');
+ const pr={number:1,head:{sha:expected.headSha,repo:{id:1},ref:'branch'},base:{sha:expected.baseSha}};
+ const run={id:2,event:'pull_request',head_sha:pr.head.sha,head_repository:{id:1},head_branch:'branch',pull_requests:[{number:1,head:pr.head,base:pr.base}],status:'completed',run_attempt:2};
+ let jobs=[{name:'Tests',status:'completed',conclusion:'success'}];
+ const api=async path=>{
+  if(path.startsWith('/contents/'))return {type:'file',encoding:'base64',size:100,content:Buffer.from(JSON.stringify({version:1,workflows:[{file:'ci.yml',jobs:['Tests']}]})).toString('base64')};
+  if(path.startsWith('/actions/workflows/'))return {total_count:1,workflow_runs:[run]};
+  assert.equal(path,'/actions/runs/2/attempts/2/jobs?per_page=100');return {total_count:jobs.length,jobs};
+ };
+ assert.equal((await ciStatus(api,pr)).state,'success');
+ jobs[0].conclusion='skipped';assert.equal((await ciStatus(api,pr)).state,'failure');
+ run.status='in_progress';assert.equal((await ciStatus(api,pr)).state,'pending');
+ run.status='completed';run.pull_requests[0]={number:1,head:pr.head,base:{sha:'wrong'}};assert.equal((await ciStatus(api,pr)).state,'pending');
+});
