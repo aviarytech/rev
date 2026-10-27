@@ -63,3 +63,49 @@ test('CI verifies latest exact PR attempt, rejecting skipped jobs and newer runn
  run.status='in_progress';assert.equal((await ciStatus(api,pr)).state,'pending');
  run.status='completed';run.pull_requests[0]={number:1,head:pr.head,base:{sha:'wrong'}};assert.equal((await ciStatus(api,pr)).state,'pending');
 });
+
+test('signed delivery persists evidence without publishing an approval',async()=>{
+ const {recordLocal}=await import('../src/local/github.js');
+ const writes=[];
+ const api=async(path,method,body)=>{
+  if(method){writes.push(body);return {};}
+  if(path==='/pulls/1')return {state:'open',changed_files:1,head:{sha:expected.headSha},base:{sha:expected.baseSha},title:'change',body:''};
+  if(path==='/pulls/1/files?per_page=100')return [{filename:'x.js'}];
+  throw Error('Recording must not depend on gate refresh or CI');
+ };
+ await recordLocal(api,'a/b',1,keys.publicKey,seal(payload,keys.privateKey),now);
+ assert.equal(writes.length,1);assert.equal(writes[0].name,'REV local attestation');assert.equal(writes[0].conclusion,'neutral');
+ assert.equal(open(JSON.parse(writes[0].output.text),keys.publicKey,expected,now).approved,true);
+});
+
+test('event routing refreshes only affected PRs; sweeps enumerate all open PRs',async()=>{
+ const {affectedPulls,benignRace}=await import('../src/local/events.js');
+ const noRead=()=>{throw Error('Targeted events must not enumerate PRs');};
+ assert.deepEqual(await affectedPulls({pull_request:{number:2}},noRead),[2]);
+ assert.deepEqual(await affectedPulls({action:'rev-local-review',client_payload:{payload:{prNumber:3}}},noRead),[3]);
+ assert.deepEqual(await affectedPulls({workflow_run:{pull_requests:[{number:2},{number:3},{number:2}]}},noRead),[2,3]);
+ assert.deepEqual(await affectedPulls({},async()=>[{number:2},{number:3}]),[2,3]);
+ await assert.rejects(affectedPulls({pull_request:{number:'bad'}},noRead));
+ assert.equal(benignRace(Error('PR changed before publication')),true);
+ assert.equal(benignRace(Error('closed-pr')),true);
+ assert.equal(benignRace(Error('github-http-403')),false);
+});
+
+test('supporting context follows relative imports without executing code or escaping root',async()=>{
+ const {dependencyContext}=await import('../src/local/context.js');
+ const objects={'src/b.js':"import x from './c.js';",'src/c.js':"import x from './b.js';",'package.json':'{}'};
+ const result=dependencyContext([{path:'src/a.js',after:"import x from './b.js'; import x from '../../outside.js';"}],p=>objects[p]??null);
+ assert.deepEqual(result.files.map(f=>f.path),['package.json','src/b.js','src/c.js']);
+ assert.deepEqual(result.unresolvedImports,['../outside.js']);
+ assert.throws(()=>dependencyContext([{path:'src/a.js',after:"import x from './b.js';"}],p=>objects[p]??null,1),/limit/);
+});
+
+test('delivery retries reuse signed evidence, acknowledge receipt and stop at a bounded limit',async()=>{
+ const {deliveryState}=await import('../scripts/local-review-worker.js');
+ const envelope=seal(payload,keys.privateKey),entry={envelope};
+ assert.equal(deliveryState(entry,[],now),'retry');
+ entry.sentAt=now;entry.deliveries=1;assert.equal(deliveryState(entry,[],now),'waiting');
+ assert.equal(deliveryState(entry,[],now+600000),'retry');
+ entry.deliveries=3;assert.equal(deliveryState(entry,[],now+600000),'exhausted');
+ assert.equal(deliveryState(entry,[{app:{slug:'github-actions'},external_id:`rev-local:${digest(envelope)}`}],now),'delivered');
+});
